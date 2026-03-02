@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Log System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- CSS Styles (Dark Theme - Enhanced) --- */
+        body {
+            font-family: 'Roboto', sans-serif; /* More modern font */
+            background-color: #121212; /* Even darker background */
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            box-sizing: border-box; /* Include padding in element's total width and height */
+        }
+
+        .container {
+            background-color: #1e1e1e; /* Darker container */
+            padding: 30px;
+            border-radius: 12px; /* Slightly more rounded corners */
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.7); /* Stronger shadow */
+            width: 95%; /* Increased width for better use of space */
+            max-width: 1100px; /* Slightly larger max-width */
+            text-align: center;
+            border: 1px solid #333; /* Subtle border */
+        }
+
+        h1, h2 {
+            color: #64ffda; /* Teal accent color for headings */
+            margin-bottom: 25px;
+            font-weight: 500; /* Slightly thinner font weight */
+        }
+
+        .input-section, .calendar-section, .summary-section, .management-section {
+            background-color: #282828; /* Consistent dark background for sections */
+            padding: 25px; /* More padding */
+            margin-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            border: 1px solid #3a3a3a; /* Subtle section border */
+        }
+        .management-section {
+            margin-top: 30px;
+        }
+
+        .date-selection, .entry-details, .copy-move-controls, .program-management-controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px; /* Increased gap */
+            margin-bottom: 25px;
+            align-items: center; /* Align items vertically in the center */
+        }
+
+        label {
+            margin-right: 5px;
+            font-weight: bold;
+            color: #b0b0b0;
+            display: flex; /* Allow labels to align with inputs */
+            align-items: center;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        input[type="color"], /* Style for color input */
+        select {
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+            border: 1px solid #555;
+            border-radius: 6px; /* Slightly more rounded */
+            padding: 10px 15px; /* More padding */
+            outline: none;
+            flex-grow: 1;
+            min-width: 150px; /* Adjusted min-width */
+            max-width: 220px; /* Adjusted max-width */
+            font-size: 0.95em;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input[type="color"] {
+            padding: 5px; /* Adjust padding for color input */
+            height: 40px; /* Fixed height for color input */
+            width: 50px; /* Fixed width for color input */
+            flex-grow: 0; /* Don't let it grow */
+            cursor: pointer;
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        input[type="color"]:focus,
+        select:focus {
+            border-color: #64ffda; /* Accent color on focus */
+            box-shadow: 0 0 8px rgba(100, 255, 218, 0.4);
+        }
+
+        button {
+            background-color: #00b894; /* Brighter green for buttons */
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.05em;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        button:hover {
+            background-color: #00997d;
+            transform: translateY(-2px); /* Slight lift effect */
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Specific style for the clear all data button */
+        #clearAllDataBtn {
+            background-color: #d63031; /* Red for destructive action */
+            margin-top: 15px; /* Space from other buttons */
+            width: auto; /* Allow button to size itself */
+            padding: 10px 20px;
+        }
+
+        #clearAllDataBtn:hover {
+            background-color: #c0392b;
+        }
+
+        /* Calendar Specific Styles */
+        .calendar-nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px; /* Increased gap */
+            margin-bottom: 20px;
+        }
+
+        #currentMonthYear {
+            font-size: 1.8em; /* Larger font */
+            font-weight: 600;
+            color: #64ffda;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px; /* Increased gap */
+            background-color: #333;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .calendar-grid > div { /* Target all direct children for consistent styling */
+            background-color: #3a3a3a;
+            border-radius: 7px;
+            padding: 12px 8px;
+            min-height: 90px; /* More space */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Align content to top */
+            align-items: center;
+            font-size: 0.9em;
+            text-align: center;
+            box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.2s ease;
+            position: relative;
+        }
+
+        .calendar-grid div.day-header {
+            background-color: #4a4a4a; /* Distinct color for headers */
+            font-weight: bold;
+            color: #eee;
+            padding: 10px 8px;
+            font-size: 1em;
+            box-shadow: none; /* No inner shadow for headers */
+        }
+
+        .calendar-grid div:not(.day-header):hover {
+            background-color: #4c4c4c; /* Lighter on hover */
+        }
+
+        .calendar-grid .day-number {
+            font-weight: bold;
+            font-size: 1.2em; /* Larger day number */
+            color: #eee;
+            margin-bottom: 8px; /* Space below day number */
+        }
+
+        .calendar-grid .day-info {
+            font-size: 0.85em;
+            color: #c0c0c0;
+            margin-top: 5px;
+            width: 100%;
+        }
+        
+        .calendar-grid .day-info .program-entry {
+            display: block;
+            margin-bottom: 7px; /* More space between programs */
+            padding: 7px;
+            border-radius: 4px;
+            text-align: left;
+            font-size: 0.78em; /* Slightly larger font */
+            line-height: 1.3;
+            position: relative;
+            padding-right: 65px; /* More space for buttons */
+            border: 1px solid #444; /* Subtle border for entries */
+            word-wrap: break-word; /* Ensure long words break */
+            /* Dynamic background color will be set by JS */
+        }
+
+        .calendar-grid .day-info .program-entry:last-child {
+            margin-bottom: 0; /* No margin for the last entry */
+        }
+
+        .calendar-grid .day-info .program-entry strong {
+            font-weight: 600;
+        }
+
+        .program-entry .entry-actions {
+            position: absolute;
+            top: 50%; /* Center vertically */
+            right: 5px;
+            transform: translateY(-50%); /* Adjust for perfect centering */
+            display: flex;
+            flex-direction: column; /* Stack buttons vertically */
+            gap: 3px;
+        }
+
+        .program-entry .entry-actions button {
+            padding: 3px 6px; /* Adjusted padding */
+            font-size: 0.65em; /* Smaller font for these buttons */
+            min-width: unset;
+            max-width: unset;
+            height: 22px; /* Fixed height for small buttons */
+            border-radius: 4px;
+            box-shadow: none; /* No shadow for these small buttons */
+            opacity: 0.9;
+            transition: opacity 0.2s ease, background-color 0.2s ease;
+        }
+
+        .program-entry .entry-actions button:hover {
+            opacity: 1;
+            transform: none; /* Remove hover transform for these small buttons */
+        }
+
+        .program-entry .entry-actions .delete-btn {
+            background-color: #ff6b6b; /* Softer red */
+        }
+        .program-entry .entry-actions .delete-btn:hover {
+            background-color: #ee5253;
+        }
+
+        .program-entry .entry-actions .edit-btn {
+            background-color: #ffeaa7; /* Softer amber */
+            color: #333; /* Dark text for light button */
+        }
+        .program-entry .entry-actions .edit-btn:hover {
+            background-color: #fed330;
+        }
+
+        /* Summary Table Styles */
+        .summary-details table {
+            width: 100%;
+            max-width: 850px; /* Slightly wider for better centering and content display */
+            border-collapse: collapse; /* Ensure single, clean borders */
+            margin: 25px auto; /* More margin above/below and center the table */
+            font-size: 0.95em;
+            background-color: #3a3a3a; /* Darker background for table */
+            border-radius: 10px; /* Slightly more rounded corners for the table */
+            overflow: hidden; /* Ensures rounded corners are applied to content */
+            border: 2px solid #64ffda; /* Clearer, creative border using accent color */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6); /* Add a subtle shadow for depth */
+        }
+
+        .summary-details th,
+        .summary-details td {
+            padding: 14px 18px; /* More padding for better readability */
+            border: 1px solid #555; /* Slightly clearer internal borders */
+            text-align: left; /* Ensure text is left-aligned */
+            word-break: break-word; /* Ensure long words break */
+        }
+
+        .summary-details th {
+            background-color: #008f79; /* A darker, richer green for headers */
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid #64ffda; /* Accent color border at bottom of header */
+        }
+
+        .summary-details tr:nth-child(even) {
+            background-color: #333; /* Alternate row color */
+        }
+
+        .summary-details tr:hover {
+            background-color: #424242; /* Highlight on hover */
+        }
+
+        .summary-details .total-salary {
+            margin-top: 30px; /* More space above total salary */
+            padding: 20px; /* More padding */
+            background-color: #2c2c2c;
+            border-radius: 10px;
+            font-size: 1.4em; /* Slightly larger font */
+            font-weight: bold;
+            color: #64ffda;
+            text-align: right;
+            border: 2px solid #64ffda; /* Match table border */
+            max-width: 850px; /* Match table width */
+            margin-left: auto; /* Center the total salary box */
+            margin-right: auto; /* Center the total salary box */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6); /* Match table shadow */
+        }
+
+        .summary-details .total-salary span {
+            color: #00b894; /* Accent color for the actual total value */
+            font-size: 1.4em;
+        }
+
+        #programList {
+            list-style: none;
+            padding: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #555;
+            border-radius: 8px;
+            background-color: #3a3a3a;
+            margin-top: 15px;
+        }
+
+        #programList li {
+            padding: 10px 15px;
+            border-bottom: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #programList li:last-child {
+            border-bottom: none;
+        }
+        #programList li span.program-display-name {
+            flex-grow: 1;
+            text-align: left;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+        }
+        #programList li .color-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            margin-right: 10px;
+            border: 1px solid #777;
+        }
+        #programList li .program-actions button {
+            padding: 5px 10px;
+            font-size: 0.8em;
+            margin-left: 5px;
+            box-shadow: none;
+        }
+        #programList li .program-actions .delete-program-btn {
+            background-color: #d63031;
+        }
+        #programList li .program-actions .delete-program-btn:hover {
+            background-color: #c0392b;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                width: 98%;
+            }
+
+            .date-selection, .entry-details, .copy-move-controls, .program-management-controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+
+            input[type="number"],
+            input[type="text"],
+            input[type="color"],
+            select {
+                max-width: 100%;
+                min-width: unset; /* Allow inputs to shrink */
+            }
+
+            input[type="color"] {
+                width: 100%; /* Full width for color picker on small screens */
+                height: 45px; /* Slightly taller for easier touch */
+            }
+
+            .calendar-grid {
+                grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); /* More flexible grid for smaller screens */
+                gap: 5px;
+                padding: 10px;
+            }
+
+            .calendar-grid > div {
+                min-height: 70px; /* Still a min-height for empty cells */
+                padding: 8px 5px;
+            }
+
+            /* Adjust actions for smaller screens if they become too cramped */
+            .program-entry .entry-actions {
+                position: relative; /* Change to relative positioning */
+                top: unset;
+                right: unset;
+                transform: none;
+                flex-direction: row; /* Buttons side-by-side */
+                justify-content: flex-end; /* Align to the right */
+                margin-top: 5px;
+                width: 100%; /* Take full width to prevent wrapping issues on tiny screens */
+            }
+            .program-entry {
+                padding-right: 7px; /* Adjust padding when actions are not absolute */
+            }
+            .program-entry .entry-actions button {
+                 padding: 5px 8px;
+                 height: auto;
+                 font-size: 0.7em;
+            }
+            #clearAllDataBtn {
+                width: 100%; /* Full width on small screens */
+            }
+            .summary-details table, .summary-details thead, .summary-details tbody, .summary-details th, .summary-details td, .summary-details tr {
+                display: block; /* Make table elements block for stacking */
+            }
+            .summary-details thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px; /* Hide table headers visually */
+            }
+            .summary-details tr {
+                margin-bottom: 15px;
+                border: 1px solid #4a4a4a;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            .summary-details td {
+                border: none; /* Remove individual cell borders */
+                border-bottom: 1px solid #4a4a4a;
+                position: relative;
+                padding-left: 50%; /* Space for the "label" before content */
+                text-align: right;
+            }
+            .summary-details td:last-child {
+                border-bottom: 0;
+            }
+            .summary-details td::before {
+                content: attr(data-label); /* Use data-label for mobile headers */
+                position: absolute;
+                left: 6px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: bold;
+                color: #64ffda; /* Accent color for mobile labels */
+            }
+            .summary-details .total-salary {
+                text-align: center;
+                font-size: 1.1em;
+            }
+            .summary-details .total-salary span {
+                font-size: 1.2em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.6em;
+            }
+            h2 {
+                font-size: 1.3em;
+            }
+            button {
+                width: 100%;
+                margin-top: 10px;
+                padding: 10px 15px;
+                font-size: 1em;
+            }
+            .program-entry {
+                font-size: 0.7em;
+            }
+            .program-entry .entry-actions {
+                flex-wrap: wrap; /* Allow buttons to wrap if too many */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Work Log System</h1>
+
+        <div class="input-section">
+            <h2>Add/Edit Work Entry</h2>
+            <div class="date-selection">
+                <label for="year">Year:</label>
+                <select id="year"></select>
+
+                <label for="month">Month:</label>
+                <select id="month"></select>
+
+                <label for="day">Day:</label>
+                <select id="day"></select>
+            </div>
+
+            <div class="entry-details">
+                <label for="programNameSelect">Select Program:</label>
+                <select id="programNameSelect">
+                    <option value="">-- Select or Add New --</option>
+                </select>
+                
+                <label for="programNameManual">Or Enter New Program:</label>
+                <input type="text" id="programNameManual" placeholder="e.g., Project Alpha">
+                
+                <label for="programColor">Color:</label>
+                <input type="color" id="programColor" value="#00b894"> 
+                
+                <label for="hours">Hours Worked:</label>
+                <input type="number" id="hours" min="0" step="0.01" placeholder="e.g., 8.5">
+
+                <label for="rate">Hourly Rate (EGP):</label>
+                <input type="number" id="rate" min="0" step="0.01" placeholder="e.g., 15.25">
+
+                <button id="addEntryBtn">Add Work Entry</button>
+            </div>
+        </div>
+
+        <div class="management-section">
+            <h2>Data Management</h2>
+
+            <h3>Copy/Move Day Data</h3>
+            <div class="copy-move-controls">
+                <label for="copyMoveFromYear">From Day:</label>
+                <select id="copyMoveFromYear"></select>
+                <select id="copyMoveFromMonth"></select>
+                <select id="copyMoveFromDay"></select>
+
+                <label for="copyMoveToYear">To Day:</label>
+                <select id="copyMoveToYear"></select>
+                <select id="copyMoveToMonth"></select>
+                <select id="copyMoveToDay"></select>
+
+                <button id="copyDayDataBtn">Copy Data</button>
+                <button id="moveDayDataBtn">Move Data</button>
+            </div>
+
+            <h3>Manage Programs</h3>
+            <div class="program-management-controls">
+                <input type="text" id="newProgramNameInput" placeholder="New Program Name">
+                <input type="color" id="newProgramColorInput" value="#64ffda">
+                <button id="addProgramBtn">Add New Program</button>
+            </div>
+            <ul id="programList"></ul>
+            <button id="clearAllDataBtn">Clear All Data</button>
+        </div>
+
+        <div class="calendar-section">
+            <h2>Monthly Overview</h2>
+            <div class="calendar-nav">
+                <button id="prevMonthBtn">&lt;</button>
+                <span id="currentMonthYear"></span>
+                <button id="nextMonthBtn">&gt;</button>
+            </div>
+            <div id="calendarGrid" class="calendar-grid">
+                </div>
+        </div>
+
+        <div class="summary-section">
+            <h2>Work Summary for <span id="summaryMonthYear"></span></h2>
+            <div id="summaryDetails">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // --- JavaScript Logic ---
+        const yearSelect = document.getElementById('year');
+        const monthSelect = document.getElementById('month');
+        const daySelect = document.getElementById('day');
+        const hoursInput = document.getElementById('hours');
+        const rateInput = document.getElementById('rate');
+        const programNameSelect = document.getElementById('programNameSelect'); // New select for programs
+        const programNameManualInput = document.getElementById('programNameManual'); // Manual input for new programs
+        const programColorInput = document.getElementById('programColor');
+        const addEntryBtn = document.getElementById('addEntryBtn');
+        const clearAllDataBtn = document.getElementById('clearAllDataBtn');
+        const calendarGrid = document.getElementById('calendarGrid');
+        const currentMonthYearSpan = document.getElementById('currentMonthYear');
+        const prevMonthBtn = document.getElementById('prevMonthBtn');
+        const nextMonthBtn = document.getElementById('nextMonthBtn');
+        const summaryDetails = document.getElementById('summaryDetails');
+        const summaryMonthYearSpan = document.getElementById('summaryMonthYear');
+
+        // Copy/Move elements
+        const copyMoveFromYearSelect = document.getElementById('copyMoveFromYear');
+        const copyMoveFromMonthSelect = document.getElementById('copyMoveFromMonth');
+        const copyMoveFromDaySelect = document.getElementById('copyMoveFromDay');
+        const copyMoveToYearSelect = document.getElementById('copyMoveToYear');
+        const copyMoveToMonthSelect = document.getElementById('copyMoveToMonth');
+        const copyMoveToDaySelect = document.getElementById('copyMoveToDay');
+        const copyDayDataBtn = document.getElementById('copyDayDataBtn');
+        const moveDayDataBtn = document.getElementById('moveDayDataBtn');
+
+        // Program Management elements
+        const newProgramNameInput = document.getElementById('newProgramNameInput');
+        const newProgramColorInput = document.getElementById('newProgramColorInput');
+        const addProgramBtn = document.getElementById('addProgramBtn');
+        const programList = document.getElementById('programList');
+
+
+        // Data storage for work entries
+        // Structure: { 'YYYY-MM-DD': [{ id: uniqueId, hours: X, rate: Y, program: 'Z' }, ...] }
+        let workEntries = JSON.parse(localStorage.getItem('workEntries')) || {};
+        // New storage for program colors: { 'ProgramName': '#RRGGBB' }
+        let programColors = JSON.parse(localStorage.getItem('programColors')) || {};
+
+        let currentViewDate = new Date();
+
+        const monthNames = ["January", "February", "March", "April", "May", "June",
+                            "July", "August", "September", "October", "November", "December"];
+
+        // --- Utility Function to generate a unique ID ---
+        function generateUniqueId() {
+            return Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
+        }
+
+        // --- Initialization Functions ---
+
+        function populateYears(selectElement) {
+            selectElement.innerHTML = '';
+            const currentYear = new Date().getFullYear();
+            for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                selectElement.appendChild(option);
+            }
+            selectElement.value = currentYear;
+        }
+
+        function populateMonths(selectElement) {
+            selectElement.innerHTML = '';
+            monthNames.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = month;
+                selectElement.appendChild(option);
+            });
+            selectElement.value = new Date().getMonth();
+        }
+
+        function populateDays(yearSelectElement, monthSelectElement, daySelectElement) {
+            daySelectElement.innerHTML = '';
+            const selectedYear = parseInt(yearSelectElement.value);
+            const selectedMonth = parseInt(monthSelectElement.value);
+            const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                daySelectElement.appendChild(option);
+            }
+            const currentDay = new Date().getDate();
+            const selectedDay = parseInt(daySelectElement.value); // Get current value before potential reset
+            if (currentDay <= daysInMonth &&
+                selectedYear === new Date().getFullYear() &&
+                selectedMonth === new Date().getMonth()) {
+                daySelectElement.value = currentDay;
+            } else if (selectedDay > 0 && selectedDay <= daysInMonth) {
+                 daySelectElement.value = selectedDay; // Keep selected day if valid
+            } else {
+                daySelectElement.value = 1; // Default to 1 if the day is out of range
+            }
+        }
+
+        function populateAllDateSelectors() {
+            populateYears(yearSelect);
+            populateMonths(monthSelect);
+            populateDays(yearSelect, monthSelect, daySelect);
+
+            populateYears(copyMoveFromYearSelect);
+            populateMonths(copyMoveFromMonthSelect);
+            populateDays(copyMoveFromYearSelect, copyMoveFromMonthSelect, copyMoveFromDaySelect);
+
+            populateYears(copyMoveToYearSelect);
+            populateMonths(copyMoveToMonthSelect);
+            populateDays(copyMoveToYearSelect, copyMoveToMonthSelect, copyMoveToDaySelect);
+        }
+
+        // --- Program Name Input/Select Handlers ---
+        function populateProgramSelect() {
+            programNameSelect.innerHTML = '<option value="">-- Select or Add New --</option>';
+            const sortedPrograms = Object.keys(programColors).sort((a, b) => a.localeCompare(b));
+            sortedPrograms.forEach(program => {
+                const option = document.createElement('option');
+                option.value = program;
+                option.textContent = program;
+                programNameSelect.appendChild(option);
+            });
+            // If programNameManual has a value, select it in the dropdown if it exists, or clear it
+            const currentManualProgram = programNameManualInput.value.trim();
+            if (currentManualProgram && programColors[currentManualProgram]) {
+                programNameSelect.value = currentManualProgram;
+                programNameManualInput.value = ''; // Clear manual if it's now selected
+            } else {
+                programNameSelect.value = ""; // Default to "Select or Add New"
+            }
+            handleProgramSelectionChange(); // Ensure color picker updates
+        }
+
+        function handleProgramSelectionChange() {
+            const selectedProgram = programNameSelect.value;
+            if (selectedProgram) {
+                programNameManualInput.value = ''; // Clear manual input if a program is selected
+                programColorInput.value = programColors[selectedProgram] || '#00b894';
+                // programColorInput.disabled = true; // Optionally disable to show it's fixed
+            } else {
+                programNameManualInput.value = ''; // Allow manual input
+                programColorInput.value = '#00b894'; // Reset to default for new programs
+                // programColorInput.disabled = false;
+            }
+        }
+
+        function handleProgramManualInputChange() {
+            const manualProgram = programNameManualInput.value.trim();
+            if (manualProgram) {
+                programNameSelect.value = ""; // Deselect from dropdown if typing manually
+                if (programColors[manualProgram]) {
+                    programColorInput.value = programColors[manualProgram];
+                    // programColorInput.disabled = true;
+                } else {
+                    programColorInput.value = '#00b894'; // Default color for new manual program
+                    // programColorInput.disabled = false;
+                }
+            } else {
+                handleProgramSelectionChange(); // If manual input is cleared, revert to select logic
+            }
+        }
+
+        function addOrUpdateProgram() {
+            const programName = newProgramNameInput.value.trim();
+            const programColor = newProgramColorInput.value;
+
+            if (!programName) {
+                alert('Please enter a program name.');
+                return;
+            }
+            
+            // Check for existing program with different color
+            if (programColors[programName] && programColors[programName] !== programColor) {
+                if (!confirm(`Program "${programName}" already exists with color ${programColors[programName]}. Do you want to update its color to ${programColor}?`)) {
+                    return;
+                }
+            }
+
+            programColors[programName] = programColor;
+            localStorage.setItem('programColors', JSON.stringify(programColors));
+            newProgramNameInput.value = ''; // Clear input
+            newProgramColorInput.value = '#64ffda'; // Reset color to default for next add
+            populateProgramSelect();
+            renderProgramList();
+            alert(`Program "${programName}" ${programColors[programName] ? 'updated' : 'added'}.`);
+        }
+
+        function renderProgramList() {
+            programList.innerHTML = '';
+            const sortedPrograms = Object.keys(programColors).sort((a, b) => a.localeCompare(b));
+            if (sortedPrograms.length === 0) {
+                programList.innerHTML = '<li>No programs added yet.</li>';
+                return;
+            }
+
+            sortedPrograms.forEach(program => {
+                const li = document.createElement('li');
+                const colorBox = document.createElement('span');
+                colorBox.classList.add('color-box');
+                colorBox.style.backgroundColor = programColors[program];
+
+                const programDisplayName = document.createElement('span');
+                programDisplayName.classList.add('program-display-name');
+                programDisplayName.appendChild(colorBox);
+                programDisplayName.append(program); // Use append for text nodes
+
+                li.appendChild(programDisplayName);
+
+                const actionsDiv = document.createElement('div');
+                actionsDiv.classList.add('program-actions');
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.classList.add('delete-program-btn');
+                deleteBtn.onclick = () => deleteProgram(program);
+                actionsDiv.appendChild(deleteBtn);
+
+                li.appendChild(actionsDiv);
+                programList.appendChild(li);
+            });
+        }
+
+        function deleteProgram(programName) {
+            if (confirm(`Are you sure you want to delete the program "${programName}"? This will NOT remove it from existing work entries, but its color might revert to default if not redefined.`)) {
+                delete programColors[programName];
+                localStorage.setItem('programColors', JSON.stringify(programColors));
+                populateProgramSelect();
+                renderProgramList();
+                renderCalendar(); // Rerender calendar to update colors if necessary
+                alert(`Program "${programName}" deleted.`);
+            }
+        }
+
+
+        // --- Calendar Functions ---
+
+        function renderCalendar() {
+            calendarGrid.innerHTML = '';
+
+            const year = currentViewDate.getFullYear();
+            const month = currentViewDate.getMonth();
+
+            currentMonthYearSpan.textContent = `${monthNames[month]} ${year}`;
+            summaryMonthYearSpan.textContent = `${monthNames[month]} ${year}`;
+
+            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayHeaders.forEach(day => {
+                const dayHeaderDiv = document.createElement('div');
+                dayHeaderDiv.classList.add('day-header');
+                dayHeaderDiv.textContent = day;
+                calendarGrid.appendChild(dayHeaderDiv);
+            });
+
+            const firstDayOfMonth = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < firstDayOfMonth; i++) {
+                calendarGrid.appendChild(document.createElement('div'));
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayCell = document.createElement('div');
+                const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                const dayNumberSpan = document.createElement('span');
+                dayNumberSpan.classList.add('day-number');
+                dayNumberSpan.textContent = day;
+                dayCell.appendChild(dayNumberSpan);
+
+                const entriesForDay = workEntries[dateString] || [];
+                if (entriesForDay.length > 0) {
+                    const dayInfoDiv = document.createElement('div');
+                    dayInfoDiv.classList.add('day-info');
+                    
+                    entriesForDay.forEach(entry => {
+                        const programEntryDiv = document.createElement('div');
+                        programEntryDiv.classList.add('program-entry');
+                        // Get color from programColors map
+                        const programColor = programColors[entry.program] || '#00b894'; // Use stored color, default if not set
+
+                        programEntryDiv.style.backgroundColor = programColor + '33'; // Adding transparency
+                        programEntryDiv.style.border = `1px solid ${programColor}`;
+
+                        programEntryDiv.innerHTML = `
+                            <strong style="color: ${programColor};">${entry.program}</strong><br>
+                            ${entry.hours.toFixed(2)} hrs @ EGP${entry.rate.toFixed(2)} (EGP${(entry.hours * entry.rate).toFixed(2)})
+                            <div class="entry-actions">
+                                <button class="edit-btn" data-date="${dateString}" data-id="${entry.id}">Edit</button>
+                                <button class="delete-btn" data-date="${dateString}" data-id="${entry.id}">X</button>
+                            </div>
+                        `;
+                        dayInfoDiv.appendChild(programEntryDiv);
+                    });
+                    dayCell.appendChild(dayInfoDiv);
+                }
+                calendarGrid.appendChild(dayCell);
+            }
+            renderSummary();
+        }
+
+        // --- Event Delegation for Calendar Entry Actions ---
+        function handleCalendarClick(event) {
+            if (event.target.classList.contains('delete-btn')) {
+                const date = event.target.dataset.date;
+                const id = event.target.dataset.id;
+                if (confirm('Are you sure you want to delete this entry?')) {
+                    deleteWorkEntry(date, id);
+                }
+            } else if (event.target.classList.contains('edit-btn')) {
+                const date = event.target.dataset.date;
+                const id = event.target.dataset.id;
+                editWorkEntry(date, id);
+            }
+        }
+
+        function changeMonth(delta) {
+            currentViewDate.setMonth(currentViewDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        // --- Work Entry Functions ---
+
+        let editingEntryId = null; 
+        let editingEntryDateKey = null;
+
+        function addWorkEntry() {
+            const year = yearSelect.value;
+            const month = String(parseInt(monthSelect.value) + 1).padStart(2, '0');
+            const day = String(daySelect.value).padStart(2, '0');
+            const hours = parseFloat(hoursInput.value);
+            const rate = parseFloat(rateInput.value);
+            
+            let programName = programNameSelect.value.trim();
+            if (!programName) { // If nothing selected from dropdown, check manual input
+                programName = programNameManualInput.value.trim();
+            }
+            programName = programName || 'General Work'; // Default if both are empty
+
+            const programColor = programColorInput.value;
+
+            if (isNaN(hours) || hours <= 0) {
+                alert('Please enter valid hours worked (greater than 0).');
+                return;
+            }
+            if (isNaN(rate) || rate < 0) {
+                alert('Please enter a valid hourly rate (non-negative).');
+                return;
+            }
+            if (!programName) {
+                alert('Please enter or select a program/task name.');
+                return;
+            }
+
+            const dateKey = `${year}-${month}-${day}`;
+
+            // Update programColors map
+            programColors[programName] = programColor;
+            localStorage.setItem('programColors', JSON.stringify(programColors));
+            populateProgramSelect(); // Update program dropdown with new/updated program
+
+            if (editingEntryId && editingEntryDateKey) {
+                if (workEntries[editingEntryDateKey]) {
+                    workEntries[editingEntryDateKey] = workEntries[editingEntryDateKey].filter(
+                        entry => entry.id !== editingEntryId
+                    );
+                    if (workEntries[editingEntryDateKey].length === 0) {
+                        delete workEntries[editingEntryDateKey];
+                    }
+                }
+                editingEntryId = null;
+                editingEntryDateKey = null;
+                addEntryBtn.textContent = 'Add Work Entry';
+            }
+
+            if (!workEntries[dateKey]) {
+                workEntries[dateKey] = [];
+            }
+
+            workEntries[dateKey].push({
+                id: generateUniqueId(),
+                hours: hours,
+                rate: rate,
+                program: programName // Color is now stored globally in programColors
+            });
+
+            localStorage.setItem('workEntries', JSON.stringify(workEntries));
+            alert('Work entry ' + (editingEntryId ? 'updated' : 'added') + '!');
+
+            renderCalendar();
+            hoursInput.value = '';
+            rateInput.value = '';
+            programNameSelect.value = ''; // Reset select
+            programNameManualInput.value = ''; // Reset manual input
+            programColorInput.value = '#00b894'; // Reset to default color for next new entry
+        }
+
+        function deleteWorkEntry(dateKey, entryId) {
+            if (workEntries[dateKey]) {
+                workEntries[dateKey] = workEntries[dateKey].filter(entry => entry.id !== entryId);
+                
+                if (workEntries[dateKey].length === 0) {
+                    delete workEntries[dateKey];
+                }
+                localStorage.setItem('workEntries', JSON.stringify(workEntries));
+                renderCalendar();
+                if (editingEntryId === entryId && editingEntryDateKey === dateKey) {
+                    editingEntryId = null;
+                    editingEntryDateKey = null;
+                    addEntryBtn.textContent = 'Add Work Entry';
+                    hoursInput.value = '';
+                    rateInput.value = '';
+                    programNameSelect.value = '';
+                    programNameManualInput.value = '';
+                    programColorInput.value = '#00b894';
+                }
+            }
+        }
+
+        function editWorkEntry(dateKey, entryId) {
+            const entryToEdit = workEntries[dateKey] ? workEntries[dateKey].find(entry => entry.id === entryId) : null;
+
+            if (entryToEdit) {
+                editingEntryId = entryId;
+                editingEntryDateKey = dateKey;
+
+                const dateParts = dateKey.split('-');
+                yearSelect.value = dateParts[0];
+                monthSelect.value = parseInt(dateParts[1]) - 1;
+                populateDays(yearSelect, monthSelect, daySelect);
+                daySelect.value = parseInt(dateParts[2]);
+                
+                hoursInput.value = entryToEdit.hours;
+                rateInput.value = entryToEdit.rate;
+                
+                // Set the program name in either the select or the manual input
+                if (programColors[entryToEdit.program]) { // If it's a known program, select it
+                    programNameSelect.value = entryToEdit.program;
+                    programNameManualInput.value = '';
+                } else { // Otherwise, put it in manual input
+                    programNameSelect.value = "";
+                    programNameManualInput.value = entryToEdit.program;
+                }
+                handleProgramSelectionChange(); // This will update the color picker based on selected/manual program
+
+                addEntryBtn.textContent = 'Update Work Entry';
+                
+                alert('Entry loaded for editing. Make your changes and click "Update Work Entry".');
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to delete ALL stored work entries and program colors? This action cannot be undone.')) {
+                localStorage.removeItem('workEntries');
+                localStorage.removeItem('programColors'); // Clear program colors too
+                workEntries = {};
+                programColors = {};
+                renderCalendar();
+                populateProgramSelect();
+                renderProgramList();
+                alert('All work entries and program colors have been cleared.');
+                editingEntryId = null;
+                editingEntryDateKey = null;
+                addEntryBtn.textContent = 'Add Work Entry';
+                hoursInput.value = '';
+                rateInput.value = '';
+                programNameSelect.value = '';
+                programNameManualInput.value = '';
+                programColorInput.value = '#00b894';
+            }
+        }
+
+        // --- Copy/Move Day Data Functions ---
+        function getDateString(yearSelectEl, monthSelectEl, daySelectEl) {
+            const year = yearSelectEl.value;
+            const month = String(parseInt(monthSelectEl.value) + 1).padStart(2, '0');
+            const day = String(daySelectEl.value).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function copyDayData() {
+            const fromDateKey = getDateString(copyMoveFromYearSelect, copyMoveFromMonthSelect, copyMoveFromDaySelect);
+            const toDateKey = getDateString(copyMoveToYearSelect, copyMoveToMonthSelect, copyMoveToDaySelect);
+
+            if (fromDateKey === toDateKey) {
+                alert('Source and destination dates cannot be the same for copying.');
+                return;
+            }
+
+            const entriesToCopy = workEntries[fromDateKey];
+
+            if (!entriesToCopy || entriesToCopy.length === 0) {
+                alert(`No work entries found for ${fromDateKey} to copy.`);
+                return;
+            }
+
+            if (workEntries[toDateKey] && workEntries[toDateKey].length > 0) {
+                if (!confirm(`Destination date ${toDateKey} already has entries. Do you want to add copied entries to it?`)) {
+                    return;
+                }
+            }
+
+            const copiedEntries = entriesToCopy.map(entry => ({ ...entry, id: generateUniqueId() })); // Generate new IDs
+            
+            if (!workEntries[toDateKey]) {
+                workEntries[toDateKey] = [];
+            }
+            workEntries[toDateKey].push(...copiedEntries);
+
+            localStorage.setItem('workEntries', JSON.stringify(workEntries));
+            renderCalendar();
+            alert(`Work entries from ${fromDateKey} copied to ${toDateKey}.`);
+        }
+
+        function moveDayData() {
+            const fromDateKey = getDateString(copyMoveFromYearSelect, copyMoveFromMonthSelect, copyMoveFromDaySelect);
+            const toDateKey = getDateString(copyMoveToYearSelect, copyMoveToMonthSelect, copyMoveToDaySelect);
+
+            if (fromDateKey === toDateKey) {
+                alert('Source and destination dates cannot be the same for moving.');
+                return;
+            }
+
+            const entriesToMove = workEntries[fromDateKey];
+
+            if (!entriesToMove || entriesToMove.length === 0) {
+                alert(`No work entries found for ${fromDateKey} to move.`);
+                return;
+            }
+
+            if (workEntries[toDateKey] && workEntries[toDateKey].length > 0) {
+                if (!confirm(`Destination date ${toDateKey} already has entries. Do you want to move and add these entries to it?`)) {
+                    return;
+                }
+            }
+            
+            // Move: copy to destination, then delete from source
+            const movedEntries = entriesToMove.map(entry => ({ ...entry, id: generateUniqueId() })); // New IDs for moved entries
+
+            if (!workEntries[toDateKey]) {
+                workEntries[toDateKey] = [];
+            }
+            workEntries[toDateKey].push(...movedEntries);
+            delete workEntries[fromDateKey]; // Remove original entries
+
+            localStorage.setItem('workEntries', JSON.stringify(workEntries));
+            renderCalendar();
+            alert(`Work entries from ${fromDateKey} moved to ${toDateKey}.`);
+        }
+
+
+        // --- Summary Functions ---
+
+        function renderSummary() {
+            summaryDetails.innerHTML = '';
+
+            const currentYear = currentViewDate.getFullYear();
+            const currentMonth = currentViewDate.getMonth() + 1;
+
+            const summaryByRate = {};
+            const summaryByProgram = {};
+            let totalMonthlyEarnings = 0;
+
+            for (const dateKey in workEntries) {
+                const [entryYear, entryMonth] = dateKey.split('-').map(Number);
+
+                if (entryYear === currentYear && entryMonth === currentMonth) {
+                    if (Array.isArray(workEntries[dateKey])) {
+                        workEntries[dateKey].forEach(entry => {
+                            // Aggregate by Rate
+                            const rateKey = entry.rate.toFixed(2); 
+                            if (!summaryByRate[rateKey]) {
+                                summaryByRate[rateKey] = { totalHours: 0, totalEarnings: 0 };
+                            }
+                            summaryByRate[rateKey].totalHours += entry.hours;
+                            summaryByRate[rateKey].totalEarnings += (entry.hours * entry.rate);
+
+                            // Aggregate by Program
+                            const programKey = entry.program.trim() || 'General Work';
+                            if (!summaryByProgram[programKey]) {
+                                summaryByProgram[programKey] = { totalHours: 0, totalEarnings: 0 };
+                            }
+                            summaryByProgram[programKey].totalHours += entry.hours;
+                            summaryByProgram[programKey].totalEarnings += (entry.hours * entry.rate);
+
+                            totalMonthlyEarnings += (entry.hours * entry.rate);
+                        });
+                    }
+                }
+            }
+
+            if (Object.keys(summaryByRate).length === 0 && Object.keys(summaryByProgram).length === 0) {
+                summaryDetails.innerHTML = '<p>No work entries for this month yet to summarize.</p>';
+                return;
+            }
+
+            // Summary by Hourly Rate - Table
+            summaryDetails.innerHTML += '<h3>Summary by Hourly Rate:</h3>';
+            let rateTableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hourly Rate (EGP)</th>
+                            <th>Total Hours</th>
+                            <th>Total Earnings (EGP)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            const sortedRates = Object.keys(summaryByRate).sort((a, b) => parseFloat(a) - parseFloat(b));
+            sortedRates.forEach(rateKey => {
+                const data = summaryByRate[rateKey];
+                rateTableHTML += `
+                    <tr>
+                        <td data-label="Hourly Rate (EGP)">EGP${parseFloat(rateKey).toFixed(2)}</td>
+                        <td data-label="Total Hours">${data.totalHours.toFixed(2)}</td>
+                        <td data-label="Total Earnings (EGP)">EGP${data.totalEarnings.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+            rateTableHTML += '</tbody></table>';
+            summaryDetails.innerHTML += rateTableHTML;
+
+            // Summary by Program/Task - Table
+            summaryDetails.innerHTML += '<h3>Summary by Program/Task:</h3>';
+            let programTableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Program/Task</th>
+                            <th>Total Hours</th>
+                            <th>Total Earnings (EGP)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            const sortedPrograms = Object.keys(summaryByProgram).sort();
+            sortedPrograms.forEach(programKey => {
+                const data = summaryByProgram[programKey];
+                // Get color from the programColors map
+                const programColor = programColors[programKey] || '#00b894';
+                programTableHTML += `
+                    <tr>
+                        <td data-label="Program/Task" style="border-left: 5px solid ${programColor}; padding-left: 10px;">${programKey}</td>
+                        <td data-label="Total Hours">${data.totalHours.toFixed(2)}</td>
+                        <td data-label="Total Earnings (EGP)">EGP${data.totalEarnings.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+            programTableHTML += '</tbody></table>';
+            summaryDetails.innerHTML += programTableHTML;
+
+            // Total Monthly Salary
+            const totalSalaryP = document.createElement('p');
+            totalSalaryP.classList.add('total-salary');
+            totalSalaryP.innerHTML = `Total Monthly Salary: <span>EGP${totalMonthlyEarnings.toFixed(2)}</span>`;
+            summaryDetails.appendChild(totalSalaryP);
+        }
+
+        // --- Event Listeners ---
+        yearSelect.addEventListener('change', () => populateDays(yearSelect, monthSelect, daySelect));
+        monthSelect.addEventListener('change', () => populateDays(yearSelect, monthSelect, daySelect));
+        addEntryBtn.addEventListener('click', addWorkEntry); 
+        clearAllDataBtn.addEventListener('click', clearAllData);
+        prevMonthBtn.addEventListener('click', () => changeMonth(-1));
+        nextMonthBtn.addEventListener('click', () => changeMonth(1));
+
+        // New event listeners for copy/move date selectors
+        copyMoveFromYearSelect.addEventListener('change', () => populateDays(copyMoveFromYearSelect, copyMoveFromMonthSelect, copyMoveFromDaySelect));
+        copyMoveFromMonthSelect.addEventListener('change', () => populateDays(copyMoveFromYearSelect, copyMoveFromMonthSelect, copyMoveFromDaySelect));
+        copyMoveToYearSelect.addEventListener('change', () => populateDays(copyMoveToYearSelect, copyMoveToMonthSelect, copyMoveToDaySelect));
+        copyMoveToMonthSelect.addEventListener('change', () => populateDays(copyMoveToYearSelect, copyMoveToMonthSelect, copyMoveToDaySelect));
+
+        copyDayDataBtn.addEventListener('click', copyDayData);
+        moveDayDataBtn.addEventListener('click', moveDayData);
+
+        // New event listeners for program management
+        programNameSelect.addEventListener('change', handleProgramSelectionChange);
+        programNameManualInput.addEventListener('input', handleProgramManualInputChange);
+        addProgramBtn.addEventListener('click', addOrUpdateProgram);
+        programList.addEventListener('click', (event) => {
+            if (event.target.classList.contains('delete-program-btn')) {
+                const programName = event.target.closest('li').querySelector('.program-display-name').textContent.substring(21); // Extract text after color box
+                deleteProgram(programName);
+            }
+        });
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            calendarGrid.addEventListener('click', handleCalendarClick);
+            populateAllDateSelectors(); // Populate all date selectors
+            populateProgramSelect(); // Populate the program dropdown
+            renderProgramList(); // Render the list of managed programs
+            renderCalendar();
+        });
+
+    </script>
+</body>
+</html>
