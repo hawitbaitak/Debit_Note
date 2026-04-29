@@ -240,7 +240,21 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">شهر الحساب</label>
-                    <input type="text" id="inputDelMonth" oninput="updatePreview()" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-900 outline-none" placeholder="مثال: فبراير 2026">
+                    <select id="inputDelMonth" onchange="updatePreview()" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                        <option value="" disabled>اختر الشهر...</option>
+                        <option value="يناير 2026">يناير 2026</option>
+                        <option value="فبراير 2026">فبراير 2026</option>
+                        <option value="مارس 2026">مارس 2026</option>
+                        <option value="أبريل 2026" selected>أبريل 2026</option>
+                        <option value="مايو 2026">مايو 2026</option>
+                        <option value="يونيو 2026">يونيو 2026</option>
+                        <option value="يوليو 2026">يوليو 2026</option>
+                        <option value="أغسطس 2026">أغسطس 2026</option>
+                        <option value="سبتمبر 2026">سبتمبر 2026</option>
+                        <option value="أكتوبر 2026">أكتوبر 2026</option>
+                        <option value="نوفمبر 2026">نوفمبر 2026</option>
+                        <option value="ديسمبر 2026">ديسمبر 2026</option>
+                    </select>
                 </div>
             </div>
             
@@ -443,16 +457,16 @@
                 </div>
             </div>
 
-            <table class="w-full border-collapse border-2 border-black text-center mb-8 text-lg bg-white shadow-sm">
+            <table class="w-full border-collapse border-2 border-black text-center text-lg bg-white shadow-sm relative z-0">
                 <thead class="bg-gray-200">
                     <tr>
-                        <th class="border border-black p-3 text-gray-800">سعر الفردي</th>
-                        <th class="border border-black p-3 text-gray-800">ع الفردي</th>
-                        <th class="border border-black p-3 text-blue-900">حساب الفردي</th>
-                        <th class="border border-black p-3 text-gray-800">سعر المكرر</th>
-                        <th class="border border-black p-3 text-gray-800">ع المكرر</th>
-                        <th class="border border-black p-3 text-blue-900">حساب المكرر</th>
-                        <th class="border border-black p-3 bg-blue-100 text-blue-900 font-black">كل الحساب</th>
+                        <th class="border border-black p-3 text-gray-800 w-[14%]">سعر الفردي</th>
+                        <th class="border border-black p-3 text-gray-800 w-[14%]">ع الفردي</th>
+                        <th class="border border-black p-3 text-blue-900 w-[14%]">حساب الفردي</th>
+                        <th class="border border-black p-3 text-gray-800 w-[14%]">سعر المكرر</th>
+                        <th class="border border-black p-3 text-gray-800 w-[14%]">ع المكرر</th>
+                        <th class="border border-black p-3 text-blue-900 w-[14%]">حساب المكرر</th>
+                        <th class="border border-black p-3 bg-blue-100 text-blue-900 font-black w-[16%]">كل الحساب</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -468,17 +482,19 @@
                 </tbody>
             </table>
 
-            <div class="mt-8 mb-4 flex justify-end px-16 relative">
-                <div class="relative text-center">
-                    <img src="logo2.png" class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-[-12px] h-32 w-32 object-contain mix-blend-multiply opacity-90 z-0" alt="Stamp" onerror="this.style.display='none'">
-                    <div class="border-t-2 border-blue-900/40 pt-3 relative z-10 min-w-[150px]">
+            <div class="flex justify-end w-full relative z-20" style="margin-top: -45px;">
+                <div class="text-center w-40 pl-6">
+                    <div class="relative">
+                        <img src="logo2.png" class="absolute bottom-[0px] left-1/2 transform -translate-x-1/2 h-28 w-28 object-contain mix-blend-multiply opacity-80 z-0 pointer-events-none" alt="Stamp" onerror="this.style.display='none'">
+                    </div>
+                    <div class="border-t-2 border-blue-900/40 pt-2 mt-[70px] relative z-10">
                         <p class="font-bold text-blue-900 text-lg">الختم الرسمي</p>
                         <p class="text-xs text-blue-900/50 mt-1">Official Stamp</p>
                     </div>
                 </div>
             </div>
 
-            <div id="excelTableContainer" class="excel-table-wrapper w-full overflow-x-auto mt-12">
+            <div id="excelTableContainer" class="excel-table-wrapper w-full overflow-x-auto mt-8">
                 </div>
             
         </div>
@@ -762,6 +778,7 @@
                 document.getElementById('inputMemoFontSize').value = 14;
             } else if (currentDocType === 'delegate') {
                 document.querySelectorAll('#delegateInputs input[type="text"], #delegateInputs input[type="number"]').forEach(input => input.value = '');
+                document.getElementById('inputDelMonth').value = 'أبريل 2026';
                 document.getElementById('inputSingleRate').value = 20;
                 document.getElementById('inputRepRate').value = 10;
                 document.getElementById('inputSingleCount').value = 0;
