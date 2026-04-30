@@ -14,6 +14,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
+        * {
+            box-sizing: border-box; /* أساسي جداً لمنع الـ Padding من تدمير مقاسات الورقة */
+        }
+
         body {
             font-family: 'Noto Sans Arabic', sans-serif;
             background-color: #f3f4f6;
@@ -21,12 +25,14 @@
             padding: 0;
         }
 
-        /* تحكم في اتجاه الطباعة ديناميكياً */
+        /* تحكم صارم في اتجاه الطباعة ديناميكياً */
         @media print {
             body {
                 background-color: white !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+                margin: 0;
+                padding: 0;
             }
             .no-print {
                 display: none !important;
@@ -34,10 +40,9 @@
             .a4-page {
                 margin: 0 !important;
                 box-shadow: none !important;
-                width: 100% !important;
-                height: auto !important;
-                padding: 10mm !important;
                 border: none !important;
+                page-break-after: always;
+                page-break-inside: avoid;
             }
             .hidden {
                 display: none !important;
@@ -51,21 +56,31 @@
             }
         }
 
+        /* مقاسات الورقة الثابتة (الطولية) */
         .a4-page {
             width: 210mm;
-            min-height: 297mm;
+            height: 297mm; /* طول ثابت لمنع الفوتر من التحرك */
             padding: 15mm;
             margin: 20px auto;
             background: white;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            box-shadow: 0 0 15px rgba(0,0,0,0.15);
             position: relative;
             border: 1px solid #e5e7eb;
+            overflow: hidden; /* يمنع أي عنصر من الخروج عن حدود الـ A4 */
         }
 
-        /* تنسيق العرض الأفقي لورقة المندوب فقط */
+        /* مقاسات الورقة الثابتة (العرضية - للمندوب) */
         .a4-landscape {
             width: 297mm !important;
-            min-height: 210mm !important;
+            height: 210mm !important;
+            padding: 15mm 20mm !important;
+        }
+
+        /* حاوية الإكسيل (مرنة الطول حتى تستوعب الجدول الكبير) */
+        .a4-flexible {
+            height: auto !important;
+            min-height: 210mm;
+            overflow: visible !important;
         }
 
         .data-label {
@@ -279,17 +294,18 @@
                 </div>
             </div>
 
-            <!-- الزر الجديد لاستخراج جميع المناديب بملف PDF -->
+            <!-- زر الاستخراج التلقائي للمناديب -->
             <div class="border-t pt-4 mt-4 bg-green-50 p-4 rounded-lg border border-green-200">
                 <label class="block text-sm font-bold text-green-900 mb-2">إصدار تلقائي للمناديب (رفع ملف حساب مجمع)</label>
                 <input type="file" id="inputBatchExcel" accept=".xlsx, .xls, .csv" onchange="handleBatchExcelUpload(event)" class="w-full border border-green-300 rounded-lg p-2 bg-white text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-green-100 file:text-green-900 hover:file:bg-green-200 transition">
-                <p class="text-xs text-green-700 mt-2">ارفع ملف الإكسيل وسيقوم النظام أوتوماتيكياً بقراءة كل صف، وتوليد وتحميل ملف PDF منفصل لكل مندوب.</p>
+                <p class="text-xs text-green-700 mt-2">ارفع ملف الإكسيل وسيقوم النظام أوتوماتيكياً بقراءة كل صف، وتوليد وتحميل ملف PDF منفصل لكل مندوب بنفس الفورمة.</p>
             </div>
 
+            <!-- زر إرفاق الجدول للتقرير الفردي -->
             <div class="border-t pt-4 mt-4">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">إرفاق جدول اللوحات (ملف Excel لعرضه في الصفحة)</label>
                 <input type="file" id="inputExcel" accept=".xlsx, .xls, .csv" onchange="handleExcelUpload(event)" class="w-full border border-gray-300 rounded-lg p-2 bg-white text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-900 hover:file:bg-blue-100 transition">
-                <p class="text-xs text-gray-500 mt-2">سيتم إدراج الجدول في صفحة جديدة تحت التقرير تلقائياً، مع تحويل قيم True/False إلى صناديق اختيار.</p>
+                <p class="text-xs text-gray-500 mt-2">سيتم إدراج الجدول في ورقة A4 عرضية جديدة تحت التقرير تلقائياً.</p>
             </div>
         </div>
 
@@ -532,6 +548,7 @@
         </div>
     </div>
 
+    <!-- ورقة حساب المندوب الرئيسية (يجب أن تكون صفحة واحدة ثابتة تماماً A4 بالعرض) -->
     <div id="delegatePrintArea" class="a4-page a4-landscape hidden pb-32">
         <img src="logo1.png" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[50%] opacity-[0.04] pointer-events-none z-0" alt="Watermark" onerror="this.style.display='none'">
         
@@ -600,10 +617,6 @@
                     </tr>
                 </tbody>
             </table>
-
-            <div id="excelTableContainer" class="excel-table-wrapper w-full overflow-x-auto mt-8 mb-48">
-            </div>
-            
         </div>
 
         <div class="absolute left-16 z-20" style="bottom: 75px; width: 160px; text-align: center;">
@@ -618,6 +631,12 @@
             <div class="text-right leading-tight text-gray-800"><p>المملكة العربية السعودية</p><p>الرياض</p><p>جوال: 0544782301</p></div>
             <div class="text-left leading-tight text-gray-800" dir="ltr"><p>Saudi Arabia</p><p>Riyadh</p><p>Mobile: 0544782301</p></div>
         </div>
+    </div>
+
+    <!-- ورقة إضافية مخصصة فقط لجدول الإكسيل المرفوع حتى لا يكسر ورقة المندوب الرئيسية -->
+    <div id="excelPrintArea" class="a4-page a4-landscape a4-flexible hidden mt-10 no-print">
+        <h3 class="text-xl font-bold text-blue-900 border-b pb-2 mb-4">جدول المرفقات الإضافي</h3>
+        <div id="excelTableContainer" class="excel-table-wrapper w-full overflow-x-auto"></div>
     </div>
 
     <script>
@@ -654,6 +673,7 @@
                 document.getElementById('warningPrintArea').classList.add('hidden');
                 document.getElementById('memoPrintArea').classList.add('hidden');
                 document.getElementById('delegatePrintArea').classList.add('hidden');
+                document.getElementById('excelPrintArea').classList.add('no-print');
             } 
             else if (type === 'warning') {
                 btnWarning.className = "px-6 py-2 rounded-md font-bold transition-colors bg-red-800 text-white shadow whitespace-nowrap";
@@ -669,6 +689,7 @@
                 document.getElementById('warningPrintArea').classList.remove('hidden');
                 document.getElementById('memoPrintArea').classList.add('hidden');
                 document.getElementById('delegatePrintArea').classList.add('hidden');
+                document.getElementById('excelPrintArea').classList.add('no-print');
             }
             else if (type === 'memo') {
                 btnMemo.className = "px-6 py-2 rounded-md font-bold transition-colors bg-amber-600 text-white shadow whitespace-nowrap";
@@ -684,6 +705,7 @@
                 document.getElementById('warningPrintArea').classList.add('hidden');
                 document.getElementById('memoPrintArea').classList.remove('hidden');
                 document.getElementById('delegatePrintArea').classList.add('hidden');
+                document.getElementById('excelPrintArea').classList.add('no-print');
             }
             else if (type === 'delegate') {
                 btnDelegate.className = "px-6 py-2 rounded-md font-bold transition-colors bg-blue-900 text-white shadow whitespace-nowrap";
@@ -699,16 +721,22 @@
                 document.getElementById('warningPrintArea').classList.add('hidden');
                 document.getElementById('memoPrintArea').classList.add('hidden');
                 document.getElementById('delegatePrintArea').classList.remove('hidden');
+                
+                // إظهار منطقة الإكسيل في الطباعة فقط إذا كان هناك جدول مرفوع
+                if (document.getElementById('excelTableContainer').innerHTML.trim() !== '') {
+                    document.getElementById('excelPrintArea').classList.remove('no-print');
+                }
             }
             
             updatePreview();
         }
 
         function printDocument() {
+            // إزالة الهوامش الافتراضية للمتصفح تماماً ليعتمد على الـ CSS فقط
             if (currentDocType === 'delegate') {
-                printStyle.innerHTML = '@page { size: A4 landscape; margin: 5mm; }';
+                printStyle.innerHTML = '@page { size: A4 landscape; margin: 0; }';
             } else {
-                printStyle.innerHTML = '@page { size: A4 portrait; margin: 5mm; }';
+                printStyle.innerHTML = '@page { size: A4 portrait; margin: 0; }';
             }
             window.print();
         }
@@ -719,7 +747,7 @@
             return `${prefix}-${datePart}-${randomPart}`;
         }
 
-        // --- الدالة الجديدة الخاصة بالاستخراج التلقائي المتعدد بصيغة PDF ---
+        // --- تصحيح دالة الاستخراج التلقائي المتعدد بصيغة PDF ---
         async function handleBatchExcelUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -731,25 +759,19 @@
                     const workbook = XLSX.read(data, {type: 'array'});
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                     
-                    // استخراج البيانات كمصفوفات لتسهيل التعامل مع الأعمدة
                     const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-                    
                     const printArea = document.getElementById('delegatePrintArea');
                     
-                    // إظهار منطقة الطباعة برمجياً ليتمكن html2pdf من التقاطها
                     printArea.classList.remove('hidden');
                     printArea.style.display = 'block';
 
-                    // تجاوز صف العناوين (index 0)
                     for (let i = 1; i < rows.length; i++) {
                         const row = rows[i];
-                        if (!row || row.length < 8) continue; // تخطي الصفوف الفارغة أو غير المكتملة
+                        if (!row || row.length < 8) continue; 
 
                         const delName = row[0];
-                        // تخطي إذا كان المندوب فارغاً أو يمثل صف الإجمالي
                         if (!delName || typeof delName !== 'string' || delName.trim().toLowerCase() === 'total') continue;
 
-                        // تحديث بيانات المندوب في واجهة الورقة المطبوعة
                         document.getElementById('outDelName').textContent = delName;
                         document.getElementById('outDelMonth').textContent = document.getElementById('inputDelMonth').value || 'أبريل 2026';
                         document.getElementById('outSingleRate').textContent = row[1] || 0;
@@ -760,31 +782,28 @@
                         document.getElementById('outRepTotal').textContent = row[6] || 0;
                         document.getElementById('outGrandTotal').textContent = row[7] || 0;
 
-                        // انتظار بسيط لتحديث الـ DOM في المتصفح
                         await new Promise(resolve => setTimeout(resolve, 300));
 
-                        // إعدادات مكتبة html2pdf لتنسيق A4 عرضي وهوامش مضبوطة
+                        // الحل النهائي لضبط الأبعاد وعدم طيران الفوتر: إجبار مقاس النافذة (windowWidth) وتصفير Margin المكتبة
                         const opt = {
-                            margin:       [10, 10, 10, 10], 
+                            margin:       0, // صفر لكي تعمل الـ CSS padding بشكل دقيق
                             filename:     `حساب_مندوب_${delName.trim()}.pdf`,
                             image:        { type: 'jpeg', quality: 1.0 },
-                            html2canvas:  { scale: 2, useCORS: true, logging: false },
+                            html2canvas:  { scale: 2, useCORS: true, windowWidth: 1123, scrollX: 0, scrollY: 0 }, // 1123px يناسب الـ A4 landscape
                             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
                         };
 
-                        // توليد وحفظ الملف للمندوب الحالي
                         await html2pdf().set(opt).from(printArea).save();
                     }
 
-                    // إرجاع واجهة المستخدم لحالتها السابقة
                     updatePreview();
                     if (currentDocType !== 'delegate') {
                         printArea.classList.add('hidden');
                     }
                     printArea.style.display = '';
                     
-                    alert('تم قراءة الإكسيل واستخراج جميع ملفات الـ PDF بنجاح!');
-                    event.target.value = ''; // تصفير حقل الإدخال
+                    alert('تم قراءة الإكسيل واستخراج جميع ملفات الـ PDF بنجاح و بمقاسات مثالية!');
+                    event.target.value = ''; 
 
                 } catch (error) {
                     console.error("Error generating batch PDFs:", error);
@@ -797,9 +816,11 @@
         function handleExcelUpload(event) {
             const file = event.target.files[0];
             const container = document.getElementById('excelTableContainer');
+            const printArea = document.getElementById('excelPrintArea');
+
             if (!file) {
                 container.innerHTML = '';
-                container.classList.remove('page-break-before');
+                printArea.classList.add('hidden', 'no-print');
                 return;
             }
             
@@ -815,7 +836,7 @@
                     const htmlStr = XLSX.utils.sheet_to_html(worksheet, { id: "excelDataTable" });
                     container.innerHTML = htmlStr;
                     
-                    container.classList.add('page-break-before');
+                    printArea.classList.remove('hidden', 'no-print');
 
                     const tds = container.querySelectorAll('td');
                     tds.forEach(td => {
@@ -977,7 +998,7 @@
                 document.getElementById('inputExcel').value = '';
                 document.getElementById('inputBatchExcel').value = '';
                 document.getElementById('excelTableContainer').innerHTML = '';
-                document.getElementById('excelTableContainer').classList.remove('page-break-before');
+                document.getElementById('excelPrintArea').classList.add('hidden', 'no-print');
             } else {
                 document.querySelectorAll('#debitInputs input, #warningInputs input, #warningInputs textarea').forEach(input => input.value = '');
                 document.getElementById('inputWarnType').value = 'إنذار أول';
