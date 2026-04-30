@@ -7,17 +7,13 @@
     <link rel="icon" type="image/png" href="noti.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- تضمين مكتبة استخراج الـ PDF -->
+    <!-- إضافة مكتبة html2pdf لتصدير ملفات المناديب المنفصلة -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        * {
-            box-sizing: border-box; /* أساسي جداً لمنع الـ Padding من تدمير مقاسات الورقة */
-        }
-
         body {
             font-family: 'Noto Sans Arabic', sans-serif;
             background-color: #f3f4f6;
@@ -25,14 +21,14 @@
             padding: 0;
         }
 
-        /* تحكم صارم في اتجاه الطباعة ديناميكياً */
+        /* تحكم في اتجاه الطباعة ديناميكياً وإلغاء الهوامش */
         @media print {
+            @page { margin: 0; }
             body {
                 background-color: white !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
                 margin: 0;
-                padding: 0;
             }
             .no-print {
                 display: none !important;
@@ -40,9 +36,11 @@
             .a4-page {
                 margin: 0 !important;
                 box-shadow: none !important;
+                width: 100% !important;
+                height: 100vh !important;
+                padding: 15mm !important;
                 border: none !important;
                 page-break-after: always;
-                page-break-inside: avoid;
             }
             .hidden {
                 display: none !important;
@@ -56,47 +54,21 @@
             }
         }
 
-        /* مقاسات الورقة الثابتة (الطولية) */
         .a4-page {
             width: 210mm;
-            height: 297mm; /* طول ثابت لمنع الفوتر من التحرك */
+            min-height: 297mm;
             padding: 15mm;
             margin: 20px auto;
             background: white;
-            box-shadow: 0 0 15px rgba(0,0,0,0.15);
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
             position: relative;
             border: 1px solid #e5e7eb;
-            overflow: hidden; /* يمنع أي عنصر من الخروج عن حدود الـ A4 */
+            box-sizing: border-box;
         }
 
-        /* مقاسات الورقة الثابتة (العرضية - للمندوب) */
         .a4-landscape {
             width: 297mm !important;
-            height: 210mm !important;
-            padding: 15mm 20mm !important;
-        }
-
-        /* حاوية الإكسيل (مرنة الطول حتى تستوعب الجدول الكبير) */
-        .a4-flexible {
-            height: auto !important;
-            min-height: 210mm;
-            overflow: visible !important;
-        }
-
-        .data-label {
-            font-weight: bold;
-            color: #1e3a8a;
-            min-width: 140px;
-            display: inline-block;
-        }
-        
-        .warn-label { color: #7f1d1d; }
-
-        .data-value {
-            color: #111827;
-            border-bottom: 1px dashed #d1d5db;
-            flex-grow: 1;
-            padding-right: 10px;
+            min-height: 210mm !important;
         }
 
         .memo-table-header {
@@ -104,7 +76,6 @@
             color: white !important;
         }
 
-        /* تنسيقات جدول الإكسيل المرفوع */
         .excel-table-wrapper table {
             width: 100%;
             border-collapse: collapse;
@@ -120,7 +91,7 @@
             vertical-align: middle;
         }
         .excel-table-wrapper tr:first-child td, .excel-table-wrapper tr:first-child th {
-            background-color: #1e3a8a !important;
+            background-color: black !important;
             color: white !important;
             font-weight: bold;
         }
@@ -253,7 +224,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">اسم المندوب</label>
-                    <input type="text" id="inputDelName" oninput="updatePreview()" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-900 outline-none" placeholder="مثال: صالح جبران">
+                    <input type="text" id="inputDelName" oninput="updatePreview()" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-900 outline-none" placeholder="مثال: صالح جبران (لإصدار ورقة مفردة)">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">شهر الحساب</label>
@@ -294,18 +265,18 @@
                 </div>
             </div>
 
-            <!-- زر الاستخراج التلقائي للمناديب -->
-            <div class="border-t pt-4 mt-4 bg-green-50 p-4 rounded-lg border border-green-200">
-                <label class="block text-sm font-bold text-green-900 mb-2">إصدار تلقائي للمناديب (رفع ملف حساب مجمع)</label>
-                <input type="file" id="inputBatchExcel" accept=".xlsx, .xls, .csv" onchange="handleBatchExcelUpload(event)" class="w-full border border-green-300 rounded-lg p-2 bg-white text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-green-100 file:text-green-900 hover:file:bg-green-200 transition">
-                <p class="text-xs text-green-700 mt-2">ارفع ملف الإكسيل وسيقوم النظام أوتوماتيكياً بقراءة كل صف، وتوليد وتحميل ملف PDF منفصل لكل مندوب بنفس الفورمة.</p>
-            </div>
-
-            <!-- زر إرفاق الجدول للتقرير الفردي -->
-            <div class="border-t pt-4 mt-4">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">إرفاق جدول اللوحات (ملف Excel لعرضه في الصفحة)</label>
-                <input type="file" id="inputExcel" accept=".xlsx, .xls, .csv" onchange="handleExcelUpload(event)" class="w-full border border-gray-300 rounded-lg p-2 bg-white text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-900 hover:file:bg-blue-100 transition">
-                <p class="text-xs text-gray-500 mt-2">سيتم إدراج الجدول في ورقة A4 عرضية جديدة تحت التقرير تلقائياً.</p>
+            <!-- أزرار الإكسيل الجديدة -->
+            <div class="border-t border-gray-300 pt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-blue-900 mb-2">توليد ملفات لكل المناديب (تلقائي)</label>
+                    <input type="file" id="inputBulkExcel" accept=".xlsx, .xls, .csv" onchange="handleBulkExcelUpload(event)" class="w-full border border-gray-300 rounded-lg p-2 bg-white text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-900 file:text-white hover:file:bg-blue-800 transition cursor-pointer">
+                    <p class="text-xs text-gray-500 mt-2">ارفع ملف إكسيل فيه (الاسم، فردي، مكرر) ليقوم البرنامج باستخراج ملف PDF منفصل لكل مندوب تلقائياً.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">إرفاق جدول لعرضه (لمندوب واحد)</label>
+                    <input type="file" id="inputExcel" accept=".xlsx, .xls, .csv" onchange="handleExcelUpload(event)" class="w-full border border-gray-300 rounded-lg p-2 bg-white text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition cursor-pointer">
+                    <p class="text-xs text-gray-500 mt-2">يُستخدم هذا الزر لإرفاق الجدول أسفل ورقة المندوب المفتوحة حالياً للطباعة العادية.</p>
+                </div>
             </div>
         </div>
 
@@ -323,10 +294,11 @@
     </div>
 
 
+    <!-- ================= إشعار الخصم ================= -->
     <div id="debitPrintArea" class="a4-page pb-32">
-        <img src="logo1.png" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[50%] opacity-[0.04] pointer-events-none z-0" alt="Watermark" onerror="this.style.display='none'">
+        <img src="logo1.png" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[50%] opacity-[0.15] pointer-events-none z-0" alt="Watermark" onerror="this.style.display='none'">
         
-        <div class="relative z-10 flex justify-between items-end border-b-2 border-gray-400 pb-2 mb-6">
+        <div class="relative z-10 flex justify-between items-end border-b-2 border-black pb-2 mb-6">
             <div class="w-1/3 text-right">
                 <h1 class="text-2xl font-black text-gray-900">لمكاني</h1>
                 <p class="text-sm text-gray-700 font-bold mt-1">س.ت: 1010460174</p>
@@ -340,41 +312,51 @@
             </div>
         </div>
 
-        <div class="relative z-10 flex justify-between items-center border-b-4 border-blue-900 pb-4 mb-10">
+        <div class="relative z-10 flex justify-between items-center border-b-4 border-black pb-4 mb-10">
             <div class="w-1/2">
-                <h1 class="text-3xl font-black text-blue-900 mb-1">إشعار خصم</h1>
-                <p class="text-lg text-amber-800 font-bold uppercase tracking-widest">Debit Note</p>
+                <h1 class="text-3xl font-black mb-1">إشعار خصم</h1>
+                <p class="text-lg font-bold uppercase tracking-widest text-gray-600">Debit Note</p>
             </div>
             <div class="w-1/2 flex justify-end">
-                <div class="text-right bg-blue-50/50 p-3 rounded-lg border border-blue-100 flex gap-6">
+                <div class="text-right border-2 border-black p-3 bg-white/80 flex gap-6">
                     <div>
-                        <p class="font-bold text-sm text-blue-900/60">الرقم التسلسلي:</p>
-                        <p id="debitSerialDisplay" class="text-lg font-mono font-bold text-amber-700">--------</p>
+                        <p class="font-bold text-sm text-gray-500">الرقم التسلسلي:</p>
+                        <p id="debitSerialDisplay" class="text-lg font-mono font-bold text-black">--------</p>
                     </div>
                     <div>
-                        <p class="font-bold text-sm text-blue-900/60">التاريخ:</p>
-                        <p id="debitDateDisplay" class="text-md font-bold text-gray-800 mt-1">--/--/----</p>
+                        <p class="font-bold text-sm text-gray-500">التاريخ:</p>
+                        <p id="debitDateDisplay" class="text-md font-bold text-black mt-1">--/--/----</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="relative z-10 space-y-8 mt-12">
-            <div class="flex items-end"><span class="data-label text-xl">السيد / السادة:</span><span id="displayName" class="data-value text-xl font-bold">..................................................................</span></div>
-            <div class="flex items-end"><span class="data-label text-xl">رقم الطلب:</span><span id="displayOrder" class="data-value text-xl font-bold">..................................................................</span></div>
-            <div class="grid grid-cols-2 gap-10 pt-10">
-                <div class="border-r-4 border-amber-800/20 pr-6">
-                    <h3 class="text-lg font-bold text-amber-800 mb-4 border-b pb-2 border-amber-800/20">تفاصيل الفاتورة</h3>
+        <div class="relative z-10 mt-12">
+            <!-- تطبيق ثيم المذكرة على البيانات -->
+            <table class="w-full border-collapse border-2 border-black text-sm mb-10 bg-white/80">
+                <tbody>
+                    <tr>
+                        <td class="border border-black p-3 font-bold bg-gray-100 w-[15%] text-center text-lg whitespace-nowrap">السيد / السادة</td>
+                        <td class="border border-black p-3 font-bold text-lg text-right" id="displayName">................................................</td>
+                        <td class="border border-black p-3 font-bold bg-gray-100 w-[15%] text-center text-lg whitespace-nowrap">رقم الطلب</td>
+                        <td class="border border-black p-3 font-bold text-lg text-center" id="displayOrder" dir="ltr">........................</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="grid grid-cols-2 gap-10">
+                <div class="border-2 border-black p-6 bg-white/80">
+                    <h3 class="text-lg font-black mb-4 border-b-2 border-black pb-2">تفاصيل الفاتورة</h3>
                     <div class="space-y-4">
-                        <div class="flex justify-between items-center"><span class="text-gray-600">قيمة اللوحة الأساسية:</span><span id="displayBase" class="font-bold text-lg text-blue-900">0.00 ر.س</span></div>
-                        <div class="flex justify-between items-center"><span class="text-gray-600">قيمة التصنيع:</span><span id="displayMfg" class="font-bold text-lg text-blue-900">0.00 ر.س</span></div>
-                        <div class="flex justify-between items-center"><span class="text-gray-600">قيمة الشحن:</span><span id="displayShipping" class="font-bold text-lg text-blue-900">0.00 ر.س</span></div>
+                        <div class="flex justify-between items-center"><span class="font-bold text-gray-600">قيمة اللوحة الأساسية:</span><span id="displayBase" class="font-bold text-lg">0.00 ر.س</span></div>
+                        <div class="flex justify-between items-center"><span class="font-bold text-gray-600">قيمة التصنيع:</span><span id="displayMfg" class="font-bold text-lg">0.00 ر.س</span></div>
+                        <div class="flex justify-between items-center"><span class="font-bold text-gray-600">قيمة الشحن:</span><span id="displayShipping" class="font-bold text-lg">0.00 ر.س</span></div>
                     </div>
                 </div>
-                <div class="bg-amber-50 border-2 border-amber-200 p-6 rounded-2xl flex flex-col justify-center items-center shadow-inner">
-                    <p class="text-amber-900 font-bold text-xl mb-3">إجمالي مبلغ الخصم</p>
-                    <div class="flex items-baseline gap-2"><span id="totalDiscount" class="text-5xl font-black text-blue-900 tracking-tighter">0.00</span><span class="text-xl font-bold text-blue-900">ر.س</span></div>
-                    <p class="text-xs text-amber-800 mt-4 font-medium italic">* (قيمة التصنيع + تكاليف الشحن)</p>
+                <div class="bg-gray-100 border-2 border-black p-6 flex flex-col justify-center items-center">
+                    <p class="font-bold text-xl mb-3">إجمالي مبلغ الخصم</p>
+                    <div class="flex items-baseline gap-2"><span id="totalDiscount" class="text-5xl font-black tracking-tighter">0.00</span><span class="text-xl font-bold">ر.س</span></div>
+                    <p class="text-sm mt-4 font-bold italic text-gray-600">* (قيمة التصنيع + تكاليف الشحن)</p>
                 </div>
             </div>
         </div>
@@ -382,32 +364,33 @@
         <div class="absolute w-full px-16 z-20" style="bottom: 75px; left: 0;">
             <div class="grid grid-cols-2 gap-20 text-center">
                 <div class="relative">
-                    <div class="border-t-2 border-gray-400 pt-2 relative z-10">
-                        <p class="font-bold text-blue-900 text-lg">توقيع المستلم</p>
+                    <div class="border-t-2 border-black pt-2 relative z-10">
+                        <p class="font-bold text-lg">توقيع المستلم</p>
                         <p class="text-xs text-gray-500 mt-1">Recipient Signature</p>
                     </div>
                 </div>
                 <div class="relative">
                     <img src="logo2.png" class="mx-auto h-28 w-28 object-contain mix-blend-multiply opacity-90 mb-[-30px] relative z-0 pointer-events-none" alt="Stamp" onerror="this.style.display='none'">
-                    <div class="border-t-2 border-blue-900/40 pt-2 relative z-10">
-                        <p class="font-bold text-blue-900 text-lg">الختم الرسمي</p>
-                        <p class="text-xs text-blue-900/50 mt-1">Official Stamp</p>
+                    <div class="border-t-2 border-black pt-2 relative z-10">
+                        <p class="font-bold text-lg">الختم الرسمي</p>
+                        <p class="text-xs text-gray-500 mt-1">Official Stamp</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="absolute bottom-0 left-0 right-0 w-full flex justify-between items-end text-xs font-bold border-t-2 border-gray-400 pt-3 bg-white px-12 pb-6 z-10">
+        <div class="absolute bottom-0 left-0 right-0 w-full flex justify-between items-end text-xs font-bold border-t-2 border-black pt-3 bg-white px-12 pb-6 z-10">
             <div class="text-right leading-tight text-gray-800"><p>المملكة العربية السعودية</p><p>الرياض</p><p>جوال: 0544782301</p></div>
-            <div class="text-center w-full absolute bottom-8 left-0 text-blue-900/40 font-medium">هذا المستند صادر آلياً ولا يعتد به بدون الختم والتوقيع الرسمي</div>
+            <div class="text-center w-full absolute bottom-8 left-0 text-gray-400 font-medium">هذا المستند صادر آلياً ولا يعتد به بدون الختم والتوقيع الرسمي</div>
             <div class="text-left leading-tight text-gray-800" dir="ltr"><p>Saudi Arabia</p><p>Riyadh</p><p>Mobile: 0544782301</p></div>
         </div>
     </div>
 
+    <!-- ================= إشعار الإنذار ================= -->
     <div id="warningPrintArea" class="a4-page hidden pb-32">
-        <img src="logo1.png" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[50%] opacity-[0.04] pointer-events-none z-0" alt="Watermark" onerror="this.style.display='none'">
+        <img src="logo1.png" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[50%] opacity-[0.15] pointer-events-none z-0" alt="Watermark" onerror="this.style.display='none'">
         
-        <div class="relative z-10 flex justify-between items-end border-b-2 border-gray-400 pb-2 mb-6">
+        <div class="relative z-10 flex justify-between items-end border-b-2 border-black pb-2 mb-6">
             <div class="w-1/3 text-right">
                 <h1 class="text-2xl font-black text-gray-900">لمكاني</h1>
                 <p class="text-sm text-gray-700 font-bold mt-1">س.ت: 1010460174</p>
@@ -421,67 +404,81 @@
             </div>
         </div>
 
-        <div class="relative z-10 flex justify-between items-center border-b-4 border-red-800 pb-4 mb-8">
+        <div class="relative z-10 flex justify-between items-center border-b-4 border-black pb-4 mb-8">
             <div class="w-1/2">
-                <h1 class="text-3xl font-black text-red-800 mb-1">إشعار إنذار</h1>
+                <h1 class="text-3xl font-black mb-1">إشعار إنذار</h1>
                 <p class="text-lg text-gray-600 font-bold uppercase tracking-widest">Warning Notice</p>
             </div>
             <div class="w-1/2 flex justify-end">
-                <div class="text-right bg-red-50/50 p-3 rounded-lg border border-red-100 flex gap-6">
+                <div class="text-right border-2 border-black p-3 bg-white/80 flex gap-6">
                     <div>
-                        <p class="font-bold text-sm text-red-800/70">رقم المرجع:</p>
-                        <p id="warnSerialDisplay" class="text-lg font-mono font-bold text-red-900">--------</p>
+                        <p class="font-bold text-sm text-gray-500">رقم المرجع:</p>
+                        <p id="warnSerialDisplay" class="text-lg font-mono font-bold text-black">--------</p>
                     </div>
                     <div>
-                        <p class="font-bold text-sm text-red-800/70">التاريخ:</p>
-                        <p id="warnDateDisplay" class="text-md font-bold text-gray-800 mt-1">--/--/----</p>
+                        <p class="font-bold text-sm text-gray-500">التاريخ:</p>
+                        <p id="warnDateDisplay" class="text-md font-bold text-black mt-1">--/--/----</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="relative z-10 space-y-6 mt-8">
-            <div class="flex justify-center mb-6"><span id="displayWarnType" class="bg-red-800 text-white px-8 py-2 rounded-full text-xl font-bold shadow-sm">إنذار أول</span></div>
-            <div class="flex items-end"><span class="data-label warn-label text-xl">الاسم:</span><span id="displayWarnName" class="data-value text-xl font-bold">..................................................................</span></div>
-            <div class="flex items-end"><span class="data-label warn-label text-xl">المرجع / المسمى:</span><span id="displayWarnRef" class="data-value text-xl font-bold">..................................................................</span></div>
-            <div class="mt-8">
-                <h3 class="text-lg font-bold text-red-800 mb-3 flex items-center gap-2">أسباب توجيه الإنذار:</h3>
-                <div class="bg-gray-50/80 border border-gray-200 rounded-lg p-5 min-h-[120px]"><p id="displayWarnReason" class="text-gray-800 leading-relaxed text-lg whitespace-pre-wrap">لم يتم إدخال تفاصيل...</p></div>
+        <div class="relative z-10 mt-8">
+            <div class="flex justify-center mb-6"><span id="displayWarnType" class="border-2 border-black bg-gray-100 px-8 py-2 text-xl font-black">إنذار أول</span></div>
+            
+            <table class="w-full border-collapse border-2 border-black text-sm mb-6 bg-white/80">
+                <tbody>
+                    <tr>
+                        <td class="border border-black p-3 font-bold bg-gray-100 w-[20%] text-center text-lg">الاسم</td>
+                        <td class="border border-black p-3 font-bold text-lg text-right" id="displayWarnName">................................................</td>
+                    </tr>
+                    <tr>
+                        <td class="border border-black p-3 font-bold bg-gray-100 w-[20%] text-center text-lg">المرجع / المسمى</td>
+                        <td class="border border-black p-3 font-bold text-lg text-right" id="displayWarnRef">................................................</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="border-2 border-black bg-white/80 p-5 mt-4">
+                <h3 class="text-lg font-black mb-3 border-b border-black pb-2">أسباب توجيه الإنذار:</h3>
+                <div class="min-h-[120px]"><p id="displayWarnReason" class="text-gray-800 leading-relaxed text-lg whitespace-pre-wrap font-medium">لم يتم إدخال تفاصيل...</p></div>
             </div>
-            <div class="mt-10 bg-red-50/80 border-r-4 border-red-800 p-5 rounded-l-lg">
-                <h4 class="font-bold text-red-900 mb-2">تنبيه هام:</h4>
-                <p class="text-red-800 font-medium leading-relaxed">نوجه عنايتكم إلى ضرورة الالتزام التام بالتعليمات والقوانين المنظمة للعمل، ونأمل عدم تكرار التجاوزات أو المخالفات المذكورة أعلاه لتجنب اتخاذ إجراءات تصعيدية أشد. <br/><strong class="text-red-900 text-lg block mt-2">برجاء الالتزام التام بما يحقق مصلحة العمل.</strong></p>
+
+            <div class="mt-8 border-r-4 border-l-4 border-y-2 border-black bg-gray-100 p-5">
+                <h4 class="font-black mb-2 text-lg">تنبيه هام:</h4>
+                <p class="font-medium leading-relaxed text-gray-800">نوجه عنايتكم إلى ضرورة الالتزام التام بالتعليمات والقوانين المنظمة للعمل، ونأمل عدم تكرار التجاوزات أو المخالفات المذكورة أعلاه لتجنب اتخاذ إجراءات تصعيدية أشد. <br/><strong class="text-black text-lg block mt-2">برجاء الالتزام التام بما يحقق مصلحة العمل.</strong></p>
             </div>
         </div>
 
         <div class="absolute w-full px-16 z-20" style="bottom: 75px; left: 0;">
             <div class="grid grid-cols-2 gap-20 text-center">
                 <div class="relative">
-                    <div class="border-t-2 border-red-800/30 pt-2 relative z-10">
-                        <p class="font-bold text-red-900 text-lg">توقيع المستلم (بالاستلام)</p>
-                        <p class="text-xs text-red-800/50 mt-1">Recipient Signature</p>
+                    <div class="border-t-2 border-black pt-2 relative z-10">
+                        <p class="font-bold text-lg">توقيع المستلم (بالاستلام)</p>
+                        <p class="text-xs text-gray-500 mt-1">Recipient Signature</p>
                     </div>
                 </div>
                 <div class="relative">
                     <img src="logo2.png" class="mx-auto h-28 w-28 object-contain mix-blend-multiply opacity-90 mb-[-30px] relative z-0 pointer-events-none" alt="Stamp" onerror="this.style.display='none'">
-                    <div class="border-t-2 border-red-800/30 pt-2 relative z-10">
-                        <p class="font-bold text-red-900 text-lg">الختم الرسمي</p>
-                        <p class="text-xs text-red-800/50 mt-1">Official Stamp</p>
+                    <div class="border-t-2 border-black pt-2 relative z-10">
+                        <p class="font-bold text-lg">الختم الرسمي</p>
+                        <p class="text-xs text-gray-500 mt-1">Official Stamp</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="absolute bottom-0 left-0 right-0 w-full flex justify-between items-end text-xs font-bold border-t-2 border-gray-400 pt-3 bg-white px-12 pb-6 z-10">
+        <div class="absolute bottom-0 left-0 right-0 w-full flex justify-between items-end text-xs font-bold border-t-2 border-black pt-3 bg-white px-12 pb-6 z-10">
             <div class="text-right leading-tight text-gray-800"><p>المملكة العربية السعودية</p><p>الرياض</p><p>جوال: 0544782301</p></div>
             <div class="text-left leading-tight text-gray-800" dir="ltr"><p>Saudi Arabia</p><p>Riyadh</p><p>Mobile: 0544782301</p></div>
         </div>
     </div>
 
+    <!-- ================= المذكرة الداخلية ================= -->
     <div id="memoPrintArea" class="a4-page hidden pb-32">
-        <img src="logo1.png" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[50%] opacity-[0.04] pointer-events-none z-0" alt="Watermark" onerror="this.style.display='none'">
+        <img src="logo1.png" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[50%] opacity-[0.15] pointer-events-none z-0" alt="Watermark" onerror="this.style.display='none'">
         
-        <div class="relative z-10 flex justify-between items-end border-b-2 border-gray-400 pb-2 mb-6">
+        <div class="relative z-10 flex justify-between items-end border-b-2 border-black pb-2 mb-6">
             <div class="w-1/3 text-right">
                 <h1 class="text-2xl font-black text-gray-900">لمكاني</h1>
                 <p class="text-sm text-gray-700 font-bold mt-1">س.ت: 1010460174</p>
@@ -496,7 +493,7 @@
         </div>
 
         <div class="relative z-10">
-            <div class="text-center mb-4"><h2 class="text-lg font-bold text-blue-900">مذكرة داخلية / MEMO</h2></div>
+            <div class="text-center mb-4"><h2 class="text-lg font-black border-2 border-black inline-block px-6 py-1 bg-gray-100">مذكرة داخلية / MEMO</h2></div>
             <table class="w-full border-collapse border-2 border-black text-sm mb-4 bg-white/80">
                 <tbody>
                     <tr class="memo-table-header">
@@ -506,53 +503,53 @@
                         <td class="memo-en-cell border border-black p-2 font-bold w-[15%] text-center whitespace-nowrap" dir="ltr">From</td>
                     </tr>
                     <tr class="bg-white">
-                        <td class="memo-ar-cell border border-black p-2 text-center text-gray-600 font-semibold whitespace-nowrap">الى :</td>
-                        <td class="memo-ar-cell border border-black p-2 font-semibold text-right" id="outMemoToAr">جميع الموظفين</td>
-                        <td class="memo-en-cell border border-black p-2 font-semibold text-left" dir="ltr" id="outMemoToEn">All Employees</td>
-                        <td class="memo-en-cell border border-black p-2 text-center text-gray-600 font-semibold whitespace-nowrap" dir="ltr">To</td>
+                        <td class="memo-ar-cell border border-black p-2 text-center font-bold whitespace-nowrap">الى :</td>
+                        <td class="memo-ar-cell border border-black p-2 font-bold text-right" id="outMemoToAr">جميع الموظفين</td>
+                        <td class="memo-en-cell border border-black p-2 font-bold text-left" dir="ltr" id="outMemoToEn">All Employees</td>
+                        <td class="memo-en-cell border border-black p-2 text-center font-bold whitespace-nowrap" dir="ltr">To</td>
                     </tr>
-                    <tr class="bg-gray-50">
-                        <td class="memo-ar-cell border border-black p-2 text-center text-gray-600 font-semibold whitespace-nowrap">نسخة الى :</td>
-                        <td class="memo-ar-cell border border-black p-2 font-semibold text-right" id="outMemoCcAr">الإدارات المعنية</td>
-                        <td class="memo-en-cell border border-black p-2 font-semibold text-left" dir="ltr" id="outMemoCcEn">Relevant Departments</td>
-                        <td class="memo-en-cell border border-black p-2 text-center text-gray-600 font-semibold whitespace-nowrap" dir="ltr">CC:</td>
+                    <tr class="bg-gray-100">
+                        <td class="memo-ar-cell border border-black p-2 text-center font-bold whitespace-nowrap">نسخة الى :</td>
+                        <td class="memo-ar-cell border border-black p-2 font-bold text-right" id="outMemoCcAr">الإدارات المعنية</td>
+                        <td class="memo-en-cell border border-black p-2 font-bold text-left" dir="ltr" id="outMemoCcEn">Relevant Departments</td>
+                        <td class="memo-en-cell border border-black p-2 text-center font-bold whitespace-nowrap" dir="ltr">CC:</td>
                     </tr>
                     <tr class="bg-white">
-                        <td class="memo-ar-cell border border-black p-2 text-center text-gray-600 font-semibold whitespace-nowrap">الموضوع :</td>
-                        <td class="memo-ar-cell border border-black p-2 font-bold text-right" id="outMemoSubAr">إجازة عيد الفطر المبارك</td>
-                        <td class="memo-en-cell border border-black p-2 font-bold text-left" dir="ltr" id="outMemoSubEn">Eid Al-Fitr Holiday</td>
-                        <td class="memo-en-cell border border-black p-2 text-center text-gray-600 font-semibold whitespace-nowrap" dir="ltr">Subject :</td>
+                        <td class="memo-ar-cell border border-black p-2 text-center font-bold whitespace-nowrap">الموضوع :</td>
+                        <td class="memo-ar-cell border border-black p-2 font-black text-right" id="outMemoSubAr">إجازة عيد الفطر المبارك</td>
+                        <td class="memo-en-cell border border-black p-2 font-black text-left" dir="ltr" id="outMemoSubEn">Eid Al-Fitr Holiday</td>
+                        <td class="memo-en-cell border border-black p-2 text-center font-bold whitespace-nowrap" dir="ltr">Subject :</td>
                     </tr>
                 </tbody>
             </table>
             <div class="mb-4">
-                <div class="text-center mb-4"><h3 class="text-lg font-bold mb-1" id="outMemoTitleAr">" عيد مبارك "</h3><h3 class="text-lg font-bold" id="outMemoTitleEn">"Eid Mubarak"</h3></div>
-                <div class="flex border border-black min-h-[300px] h-auto bg-white/80">
-                    <div id="memoBodyArWrapper" class="w-1/2 p-4 text-right border-l border-black"><p id="outMemoBodyAr" class="whitespace-pre-wrap leading-relaxed text-gray-800 font-medium" style="font-size: 14px;"></p></div>
-                    <div id="memoBodyEnWrapper" class="w-1/2 p-4 text-left" dir="ltr"><p id="outMemoBodyEn" class="whitespace-pre-wrap leading-relaxed text-gray-800 font-medium" style="font-size: 14px;"></p></div>
+                <div class="text-center mb-4 mt-6"><h3 class="text-lg font-black mb-1" id="outMemoTitleAr">" عيد مبارك "</h3><h3 class="text-lg font-black" id="outMemoTitleEn">"Eid Mubarak"</h3></div>
+                <div class="flex border-2 border-black min-h-[300px] h-auto bg-white/80">
+                    <div id="memoBodyArWrapper" class="w-1/2 p-4 text-right border-l-2 border-black"><p id="outMemoBodyAr" class="whitespace-pre-wrap leading-relaxed text-gray-900 font-medium" style="font-size: 14px;"></p></div>
+                    <div id="memoBodyEnWrapper" class="w-1/2 p-4 text-left" dir="ltr"><p id="outMemoBodyEn" class="whitespace-pre-wrap leading-relaxed text-gray-900 font-medium" style="font-size: 14px;"></p></div>
                 </div>
             </div>
             
             <div class="absolute left-16 z-20" style="bottom: 75px; width: 160px; text-align: center;">
                 <img src="logo2.png" class="mx-auto h-28 w-28 object-contain mix-blend-multiply opacity-90 mb-[-30px] relative z-0 pointer-events-none" alt="Stamp" onerror="this.style.display='none'">
-                <div class="border-t-2 border-blue-900/40 pt-2 relative z-10">
-                    <p class="font-bold text-blue-900 text-lg">الختم الرسمي</p>
-                    <p class="text-xs text-blue-900/50 mt-1">Official Stamp</p>
+                <div class="border-t-2 border-black pt-2 relative z-10">
+                    <p class="font-bold text-lg">الختم الرسمي</p>
+                    <p class="text-xs text-gray-500 mt-1">Official Stamp</p>
                 </div>
             </div>
         </div>
         
-        <div class="absolute bottom-0 left-0 right-0 w-full flex justify-between items-end text-xs font-bold border-t-2 border-gray-400 pt-3 bg-white px-12 pb-6 z-10">
+        <div class="absolute bottom-0 left-0 right-0 w-full flex justify-between items-end text-xs font-bold border-t-2 border-black pt-3 bg-white px-12 pb-6 z-10">
             <div class="text-right leading-tight text-gray-800"><p>المملكة العربية السعودية</p><p>الرياض</p><p>جوال: 0544782301</p></div>
             <div class="text-left leading-tight text-gray-800" dir="ltr"><p>Saudi Arabia</p><p>Riyadh</p><p>Mobile: 0544782301</p></div>
         </div>
     </div>
 
-    <!-- ورقة حساب المندوب الرئيسية (يجب أن تكون صفحة واحدة ثابتة تماماً A4 بالعرض) -->
+    <!-- ================= حساب المناديب ================= -->
     <div id="delegatePrintArea" class="a4-page a4-landscape hidden pb-32">
-        <img src="logo1.png" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[50%] opacity-[0.04] pointer-events-none z-0" alt="Watermark" onerror="this.style.display='none'">
+        <img src="logo1.png" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[40%] opacity-[0.15] pointer-events-none z-0" alt="Watermark" onerror="this.style.display='none'">
         
-        <div class="relative z-10 flex justify-between items-end border-b-2 border-gray-400 pb-2 mb-6">
+        <div class="relative z-10 flex justify-between items-end border-b-2 border-black pb-2 mb-6">
             <div class="w-1/3 text-right">
                 <h1 class="text-2xl font-black text-gray-900">لمكاني</h1>
                 <p class="text-sm text-gray-700 font-bold mt-1">س.ت: 1010460174</p>
@@ -566,77 +563,75 @@
             </div>
         </div>
 
-        <div class="relative z-10 flex justify-between items-center border-b-4 border-blue-900 pb-4 mb-8">
+        <div class="relative z-10 flex justify-between items-center border-b-4 border-black pb-4 mb-8">
             <div class="w-1/2">
-                <h1 class="text-3xl font-black text-blue-900 mb-1">حساب مندوب</h1>
+                <h1 class="text-3xl font-black mb-1">حساب مندوب</h1>
                 <p class="text-lg text-gray-600 font-bold uppercase tracking-widest">Delegate Account</p>
             </div>
             <div class="w-1/2 flex justify-end">
-                <div class="text-right bg-blue-50 p-3 rounded-lg border border-blue-100 flex gap-6">
+                <div class="text-right border-2 border-black p-3 bg-white/80 flex gap-6">
                     <div>
-                        <p class="font-bold text-sm text-blue-900/70">تاريخ الإصدار:</p>
-                        <p id="delDateDisplay" class="text-md font-bold text-gray-800 mt-1">--/--/----</p>
+                        <p class="font-bold text-sm text-gray-500">تاريخ الإصدار:</p>
+                        <p id="delDateDisplay" class="text-md font-bold text-black mt-1">--/--/----</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="relative z-10">
-            <div class="flex justify-center items-center mb-6 px-4 py-4 bg-gray-100 rounded-lg border border-gray-300 gap-10">
-                <div class="text-xl font-bold">
-                    <span class="text-gray-600">حساب مندوب:</span>
-                    <span id="outDelName" class="text-blue-900 mx-2 text-2xl">....................</span>
-                </div>
-                <div class="text-xl font-bold">
-                    <span class="text-gray-600">عن شهر:</span>
-                    <span id="outDelMonth" class="text-blue-900 mx-2 text-2xl">....................</span>
-                </div>
-            </div>
-
-            <table class="w-full border-collapse border-2 border-black text-center text-lg bg-white shadow-sm relative z-0">
-                <thead class="bg-gray-200">
+            <table class="w-full border-collapse border-2 border-black text-sm mb-6 bg-white/80">
+                <tbody>
                     <tr>
-                        <th class="border border-black p-3 text-gray-800 w-[14%]">سعر الفردي</th>
-                        <th class="border border-black p-3 text-gray-800 w-[14%]">ع الفردي</th>
-                        <th class="border border-black p-3 text-blue-900 w-[14%]">حساب الفردي</th>
-                        <th class="border border-black p-3 text-gray-800 w-[14%]">سعر المكرر</th>
-                        <th class="border border-black p-3 text-gray-800 w-[14%]">ع المكرر</th>
-                        <th class="border border-black p-3 text-blue-900 w-[14%]">حساب المكرر</th>
-                        <th class="border border-black p-3 bg-blue-100 text-blue-900 font-black w-[16%]">كل الحساب</th>
+                        <td class="border border-black p-3 font-bold bg-gray-100 w-[15%] text-center text-lg whitespace-nowrap">اسم المندوب</td>
+                        <td class="border border-black p-3 font-bold text-xl text-center" id="outDelName">....................</td>
+                        <td class="border border-black p-3 font-bold bg-gray-100 w-[15%] text-center text-lg whitespace-nowrap">عن شهر</td>
+                        <td class="border border-black p-3 font-bold text-xl text-center" id="outDelMonth">....................</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <table class="w-full border-collapse border-2 border-black text-center text-lg bg-white shadow-sm relative z-0 mt-4">
+                <thead class="bg-black text-white">
+                    <tr>
+                        <th class="border border-black p-3 w-[14%]">سعر الفردي</th>
+                        <th class="border border-black p-3 w-[14%]">ع الفردي</th>
+                        <th class="border border-gray-600 p-3 bg-gray-800 w-[14%]">حساب الفردي</th>
+                        <th class="border border-black p-3 w-[14%]">سعر المكرر</th>
+                        <th class="border border-black p-3 w-[14%]">ع المكرر</th>
+                        <th class="border border-gray-600 p-3 bg-gray-800 w-[14%]">حساب المكرر</th>
+                        <th class="border border-gray-600 p-3 bg-gray-300 text-black font-black w-[16%]">كل الحساب</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td class="border border-black p-3 font-bold" id="outSingleRate">20</td>
                         <td class="border border-black p-3 font-bold" id="outSingleCount">0</td>
-                        <td class="border border-black p-3 font-black text-blue-900" id="outSingleTotal">0</td>
+                        <td class="border border-black p-3 font-black bg-gray-100" id="outSingleTotal">0</td>
                         <td class="border border-black p-3 font-bold" id="outRepRate">10</td>
                         <td class="border border-black p-3 font-bold" id="outRepCount">0</td>
-                        <td class="border border-black p-3 font-black text-blue-900" id="outRepTotal">0</td>
-                        <td class="border border-black p-4 font-black bg-blue-100 text-2xl text-blue-900" id="outGrandTotal">0</td>
+                        <td class="border border-black p-3 font-black bg-gray-100" id="outRepTotal">0</td>
+                        <td class="border border-black p-4 font-black bg-gray-200 text-2xl" id="outGrandTotal">0</td>
                     </tr>
                 </tbody>
             </table>
+
+            <div id="excelTableContainer" class="excel-table-wrapper w-full overflow-x-auto mt-8 mb-48">
+            </div>
+            
         </div>
 
         <div class="absolute left-16 z-20" style="bottom: 75px; width: 160px; text-align: center;">
             <img src="logo2.png" class="mx-auto h-28 w-28 object-contain mix-blend-multiply opacity-90 mb-[-30px] relative z-0 pointer-events-none" alt="Stamp" onerror="this.style.display='none'">
-            <div class="border-t-2 border-blue-900/40 pt-2 relative z-10">
-                <p class="font-bold text-blue-900 text-lg">الختم الرسمي</p>
-                <p class="text-xs text-blue-900/50 mt-1">Official Stamp</p>
+            <div class="border-t-2 border-black pt-2 relative z-10">
+                <p class="font-bold text-lg">الختم الرسمي</p>
+                <p class="text-xs text-gray-500 mt-1">Official Stamp</p>
             </div>
         </div>
 
-        <div class="absolute bottom-0 left-0 right-0 w-full flex justify-between items-end text-xs font-bold border-t-2 border-gray-400 pt-3 bg-white px-12 pb-6 z-10">
+        <div class="absolute bottom-0 left-0 right-0 w-full flex justify-between items-end text-xs font-bold border-t-2 border-black pt-3 bg-white px-12 pb-6 z-10">
             <div class="text-right leading-tight text-gray-800"><p>المملكة العربية السعودية</p><p>الرياض</p><p>جوال: 0544782301</p></div>
             <div class="text-left leading-tight text-gray-800" dir="ltr"><p>Saudi Arabia</p><p>Riyadh</p><p>Mobile: 0544782301</p></div>
         </div>
-    </div>
-
-    <!-- ورقة إضافية مخصصة فقط لجدول الإكسيل المرفوع حتى لا يكسر ورقة المندوب الرئيسية -->
-    <div id="excelPrintArea" class="a4-page a4-landscape a4-flexible hidden mt-10 no-print">
-        <h3 class="text-xl font-bold text-blue-900 border-b pb-2 mb-4">جدول المرفقات الإضافي</h3>
-        <div id="excelTableContainer" class="excel-table-wrapper w-full overflow-x-auto"></div>
     </div>
 
     <script>
@@ -673,7 +668,6 @@
                 document.getElementById('warningPrintArea').classList.add('hidden');
                 document.getElementById('memoPrintArea').classList.add('hidden');
                 document.getElementById('delegatePrintArea').classList.add('hidden');
-                document.getElementById('excelPrintArea').classList.add('no-print');
             } 
             else if (type === 'warning') {
                 btnWarning.className = "px-6 py-2 rounded-md font-bold transition-colors bg-red-800 text-white shadow whitespace-nowrap";
@@ -689,7 +683,6 @@
                 document.getElementById('warningPrintArea').classList.remove('hidden');
                 document.getElementById('memoPrintArea').classList.add('hidden');
                 document.getElementById('delegatePrintArea').classList.add('hidden');
-                document.getElementById('excelPrintArea').classList.add('no-print');
             }
             else if (type === 'memo') {
                 btnMemo.className = "px-6 py-2 rounded-md font-bold transition-colors bg-amber-600 text-white shadow whitespace-nowrap";
@@ -705,7 +698,6 @@
                 document.getElementById('warningPrintArea').classList.add('hidden');
                 document.getElementById('memoPrintArea').classList.remove('hidden');
                 document.getElementById('delegatePrintArea').classList.add('hidden');
-                document.getElementById('excelPrintArea').classList.add('no-print');
             }
             else if (type === 'delegate') {
                 btnDelegate.className = "px-6 py-2 rounded-md font-bold transition-colors bg-blue-900 text-white shadow whitespace-nowrap";
@@ -721,22 +713,16 @@
                 document.getElementById('warningPrintArea').classList.add('hidden');
                 document.getElementById('memoPrintArea').classList.add('hidden');
                 document.getElementById('delegatePrintArea').classList.remove('hidden');
-                
-                // إظهار منطقة الإكسيل في الطباعة فقط إذا كان هناك جدول مرفوع
-                if (document.getElementById('excelTableContainer').innerHTML.trim() !== '') {
-                    document.getElementById('excelPrintArea').classList.remove('no-print');
-                }
             }
             
             updatePreview();
         }
 
         function printDocument() {
-            // إزالة الهوامش الافتراضية للمتصفح تماماً ليعتمد على الـ CSS فقط
             if (currentDocType === 'delegate') {
-                printStyle.innerHTML = '@page { size: A4 landscape; margin: 0; }';
+                printStyle.innerHTML = '@media print { @page { size: A4 landscape; margin: 0; } body { margin: 0; } }';
             } else {
-                printStyle.innerHTML = '@page { size: A4 portrait; margin: 0; }';
+                printStyle.innerHTML = '@media print { @page { size: A4 portrait; margin: 0; } body { margin: 0; } }';
             }
             window.print();
         }
@@ -747,8 +733,8 @@
             return `${prefix}-${datePart}-${randomPart}`;
         }
 
-        // --- تصحيح دالة الاستخراج التلقائي المتعدد بصيغة PDF ---
-        async function handleBatchExcelUpload(event) {
+        // ================= إضافة وظيفة استخراج الدفعات من ملف الاكسيل تلقائياً =================
+        async function handleBulkExcelUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
 
@@ -757,70 +743,86 @@
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, {type: 'array'});
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    
-                    const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-                    const printArea = document.getElementById('delegatePrintArea');
-                    
-                    printArea.classList.remove('hidden');
-                    printArea.style.display = 'block';
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(worksheet);
 
-                    for (let i = 1; i < rows.length; i++) {
-                        const row = rows[i];
-                        if (!row || row.length < 8) continue; 
-
-                        const delName = row[0];
-                        if (!delName || typeof delName !== 'string' || delName.trim().toLowerCase() === 'total') continue;
-
-                        document.getElementById('outDelName').textContent = delName;
-                        document.getElementById('outDelMonth').textContent = document.getElementById('inputDelMonth').value || 'أبريل 2026';
-                        document.getElementById('outSingleRate').textContent = row[1] || 0;
-                        document.getElementById('outSingleCount').textContent = row[2] || 0;
-                        document.getElementById('outSingleTotal').textContent = row[3] || 0;
-                        document.getElementById('outRepRate').textContent = row[4] || 0;
-                        document.getElementById('outRepCount').textContent = row[5] || 0;
-                        document.getElementById('outRepTotal').textContent = row[6] || 0;
-                        document.getElementById('outGrandTotal').textContent = row[7] || 0;
-
-                        await new Promise(resolve => setTimeout(resolve, 300));
-
-                        // الحل النهائي لضبط الأبعاد وعدم طيران الفوتر: إجبار مقاس النافذة (windowWidth) وتصفير Margin المكتبة
-                        const opt = {
-                            margin:       0, // صفر لكي تعمل الـ CSS padding بشكل دقيق
-                            filename:     `حساب_مندوب_${delName.trim()}.pdf`,
-                            image:        { type: 'jpeg', quality: 1.0 },
-                            html2canvas:  { scale: 2, useCORS: true, windowWidth: 1123, scrollX: 0, scrollY: 0 }, // 1123px يناسب الـ A4 landscape
-                            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-                        };
-
-                        await html2pdf().set(opt).from(printArea).save();
+                    if(json.length === 0) {
+                        alert("الملف فارغ!"); return;
                     }
 
-                    updatePreview();
-                    if (currentDocType !== 'delegate') {
-                        printArea.classList.add('hidden');
-                    }
-                    printArea.style.display = '';
-                    
-                    alert('تم قراءة الإكسيل واستخراج جميع ملفات الـ PDF بنجاح و بمقاسات مثالية!');
-                    event.target.value = ''; 
+                    const sRate = parseFloat(document.getElementById('inputSingleRate').value) || 20;
+                    const rRate = parseFloat(document.getElementById('inputRepRate').value) || 10;
+                    const month = document.getElementById('inputDelMonth').value || "غير محدد";
 
-                } catch (error) {
-                    console.error("Error generating batch PDFs:", error);
-                    alert("حدث خطأ أثناء معالجة الملف واستخراج البيانات.");
+                    // إخفاء جدول الاكسيل العادي إن وُجد
+                    document.getElementById('excelTableContainer').style.display = 'none';
+
+                    for (let i = 0; i < json.length; i++) {
+                        const row = json[i];
+                        
+                        // محاولة العثور على الأعمدة بأي مسمى مقارب لتفادي أخطاء المسميات
+                        const nameKey = Object.keys(row).find(k => k.includes('اسم') || k.includes('المندوب'));
+                        const singleKey = Object.keys(row).find(k => k.includes('فردي'));
+                        const repKey = Object.keys(row).find(k => k.includes('مكرر'));
+
+                        if(!nameKey) continue; 
+
+                        const name = row[nameKey];
+                        const sCount = singleKey ? (parseFloat(row[singleKey]) || 0) : 0;
+                        const rCount = repKey ? (parseFloat(row[repKey]) || 0) : 0;
+
+                        await downloadPDFForDelegate(name, month, sRate, sCount, rRate, rCount);
+                    }
+                    
+                    alert("تم الانتهاء من استخراج جميع حسابات المناديب بنجاح!");
+                    document.getElementById('excelTableContainer').style.display = ''; // إعادته
+                } catch(err) {
+                    console.error(err);
+                    alert("حدث خطأ أثناء قراءة الملف، تأكد من صحة الأعمدة");
                 }
             };
             reader.readAsArrayBuffer(file);
         }
 
+        function downloadPDFForDelegate(name, month, sRate, sCount, rRate, rCount) {
+            return new Promise((resolve) => {
+                // تعبئة البيانات
+                const sTotal = sCount * sRate;
+                const rTotal = rCount * rRate;
+                
+                document.getElementById('outDelName').textContent = name || "....................";
+                document.getElementById('outDelMonth').textContent = month;
+                document.getElementById('outSingleCount').textContent = sCount;
+                document.getElementById('outSingleTotal').textContent = sTotal;
+                document.getElementById('outRepCount').textContent = rCount;
+                document.getElementById('outRepTotal').textContent = rTotal;
+                document.getElementById('outGrandTotal').textContent = sTotal + rTotal;
+
+                const element = document.getElementById('delegatePrintArea');
+                element.classList.remove('hidden');
+
+                // اعدادات html2pdf
+                const opt = {
+                    margin:       0,
+                    filename:     `حساب_${name}_${month}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                };
+
+                html2pdf().set(opt).from(element).save().then(() => {
+                    setTimeout(resolve, 800); // مهلة لتفادي تعليق المتصفح بين الملفات
+                });
+            });
+        }
+        // ====================================================================================
+
         function handleExcelUpload(event) {
             const file = event.target.files[0];
             const container = document.getElementById('excelTableContainer');
-            const printArea = document.getElementById('excelPrintArea');
-
             if (!file) {
                 container.innerHTML = '';
-                printArea.classList.add('hidden', 'no-print');
+                container.classList.remove('page-break-before');
                 return;
             }
             
@@ -836,15 +838,15 @@
                     const htmlStr = XLSX.utils.sheet_to_html(worksheet, { id: "excelDataTable" });
                     container.innerHTML = htmlStr;
                     
-                    printArea.classList.remove('hidden', 'no-print');
+                    container.classList.add('page-break-before');
 
                     const tds = container.querySelectorAll('td');
                     tds.forEach(td => {
                         const text = td.innerText.trim().toUpperCase();
                         if (text === 'TRUE') {
-                            td.innerHTML = '<div class="flex justify-center items-center"><input type="checkbox" checked onclick="return false;" class="w-5 h-5 accent-blue-900 cursor-default"></div>';
+                            td.innerHTML = '<div class="flex justify-center items-center"><input type="checkbox" checked onclick="return false;" class="w-5 h-5 accent-black cursor-default"></div>';
                         } else if (text === 'FALSE') {
-                            td.innerHTML = '<div class="flex justify-center items-center"><input type="checkbox" onclick="return false;" class="w-5 h-5 accent-blue-900 cursor-default"></div>';
+                            td.innerHTML = '<div class="flex justify-center items-center"><input type="checkbox" onclick="return false;" class="w-5 h-5 accent-black cursor-default"></div>';
                         }
                     });
 
@@ -865,8 +867,8 @@
                 const shipping = parseFloat(document.getElementById('inputShipping').value) || 0;
                 const total = mfg + shipping;
 
-                document.getElementById('displayName').textContent = name || "..................................................................";
-                document.getElementById('displayOrder').textContent = order || "..................................................................";
+                document.getElementById('displayName').textContent = name || "................................................";
+                document.getElementById('displayOrder').textContent = order || "........................";
                 document.title = name ? "إشعار خصم - " + name : "إشعار خصم";
 
                 const formatter = new Intl.NumberFormat('ar-SA', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -882,8 +884,8 @@
                 const warnType = document.getElementById('inputWarnType').value;
                 const warnReason = document.getElementById('inputWarnReason').value;
 
-                document.getElementById('displayWarnName').textContent = warnName || "..................................................................";
-                document.getElementById('displayWarnRef').textContent = warnRef || "..................................................................";
+                document.getElementById('displayWarnName').textContent = warnName || "................................................";
+                document.getElementById('displayWarnRef').textContent = warnRef || "................................................";
                 document.getElementById('displayWarnType').textContent = warnType;
                 document.getElementById('displayWarnReason').textContent = warnReason || "لم يتم إدخال تفاصيل...";
                 document.title = warnName ? "إنذار - " + warnName : "إشعار إنذار";
@@ -924,7 +926,7 @@
                     bodyEnWrap.style.display = '';
                     bodyArWrap.style.display = '';
                     bodyEnWrap.className = 'w-1/2 p-4 text-left';
-                    bodyArWrap.className = 'w-1/2 p-4 text-right border-l border-black';
+                    bodyArWrap.className = 'w-1/2 p-4 text-right border-l-2 border-black';
                     titleAr.style.display = '';
                     titleEn.style.display = '';
                 } else if (memoLang === 'ar') {
@@ -996,9 +998,9 @@
                 document.getElementById('inputSingleCount').value = 0;
                 document.getElementById('inputRepCount').value = 0;
                 document.getElementById('inputExcel').value = '';
-                document.getElementById('inputBatchExcel').value = '';
+                document.getElementById('inputBulkExcel').value = '';
                 document.getElementById('excelTableContainer').innerHTML = '';
-                document.getElementById('excelPrintArea').classList.add('hidden', 'no-print');
+                document.getElementById('excelTableContainer').classList.remove('page-break-before');
             } else {
                 document.querySelectorAll('#debitInputs input, #warningInputs input, #warningInputs textarea').forEach(input => input.value = '');
                 document.getElementById('inputWarnType').value = 'إنذار أول';
