@@ -226,10 +226,11 @@
             if(!file) return;
             const reader = new FileReader();
             reader.onload = (e) => {
-                const workbook = XLSX.read(e.target.result, {type: 'array'});
-                installData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                // تفعيل cellDates و raw: false عشان يقرأ التواريخ كنصوص زي الإكسيل بالظبط
+                const workbook = XLSX.read(e.target.result, {type: 'array', cellDates: true});
+                installData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {raw: false});
                 document.getElementById('installStatus').classList.remove('hidden');
-                const persons = new Set(installData.map(r => r.person || r['المندوب']).filter(Boolean));
+                const persons = new Set(installData.map(r => r['المندوب'] || r.person).filter(Boolean));
                 document.getElementById('installCountText').textContent = `تم العثور على (${persons.size}) مناديب في الملف`;
             };
             reader.readAsArrayBuffer(file);
@@ -239,10 +240,8 @@
             const today = new Date().toLocaleDateString('ar-SA');
             
             if (!isMultiPage) {
-                // تصميم مخصص للمجمع (صفحة واحدة فقط بحجم ثابت ومقصوصة بشكل دقيق)
                 return `
                 <div style="font-family: 'Noto Sans Arabic', Arial, sans-serif; direction: rtl; width: 297mm; height: 209mm; padding: 12mm 15mm 0 15mm; box-sizing: border-box; background: white; position: relative; overflow: hidden;">
-                    
                     <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #9ca3af; padding-bottom: 10px; margin-bottom: 20px;">
                         <div style="text-align: right;">
                             <div style="font-size: 24px; font-weight: 900; color: #111827;">هوية بيتك</div>
@@ -254,9 +253,7 @@
                             <div style="font-size: 14px; font-weight: bold; color: #374151;">C.R: 1010460174</div>
                         </div>
                     </div>
-
                     ${contentHtml}
-
                     <div style="position: absolute; bottom: 75px; left: 40px; right: 40px; display: flex; justify-content: space-between; align-items: flex-end; box-sizing: border-box;">
                         <div style="text-align: center; width: 200px;">
                             <div style="border-top: 2px solid #9ca3af; padding-top: 10px;">
@@ -272,17 +269,14 @@
                             </div>
                         </div>
                     </div>
-                    
                     <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 50px; display: flex; justify-content: space-between; align-items: flex-end; font-size: 10px; font-weight: bold; border-top: 2px solid #9ca3af; padding-top: 10px; padding-bottom: 15px; padding-left: 40px; padding-right: 40px; box-sizing: border-box;">
                         <div style="text-align: right; line-height: 1.2; color: #1f2937;"><div>المملكة العربية السعودية</div><div>الرياض</div><div>جوال: 0544782301</div></div>
                         <div style="text-align: left; line-height: 1.2; color: #1f2937;" dir="ltr"><div>Saudi Arabia</div><div>Riyadh</div><div>Mobile: 0544782301</div></div>
                     </div>
                 </div>`;
             } else {
-                // تصميم تقرير اللوحات (يسمح بتعدد الصفحات)
                 return `
                 <div style="font-family: 'Noto Sans Arabic', Arial, sans-serif; direction: rtl; padding: 20px 30px; background: white;">
-                    
                     <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #9ca3af; padding-bottom: 10px; margin-bottom: 20px;">
                         <div style="text-align: right;">
                             <div style="font-size: 24px; font-weight: 900; color: #111827;">هوية بيتك</div>
@@ -294,9 +288,7 @@
                             <div style="font-size: 14px; font-weight: bold; color: #374151;">C.R: 1010460174</div>
                         </div>
                     </div>
-
                     ${contentHtml}
-
                     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 60px; padding: 0 20px; page-break-inside: avoid;">
                         <div style="text-align: center; width: 220px;">
                             <div style="border-top: 2px solid #9ca3af; padding-top: 10px;">
@@ -366,46 +358,64 @@
             else if (type === 'install') {
                 const grouped = {};
                 installData.forEach(row => {
-                    const p = row.person || row['المندوب'] || "غير محدد";
+                    const p = row['المندوب'] || row.person || "غير محدد";
                     if (!grouped[p]) grouped[p] = [];
                     grouped[p].push(row);
                 });
 
                 for (const personName of Object.keys(grouped)) {
                     const rows = grouped[personName];
-                    const doneRows = rows.filter(r => String(r.done).trim().toLowerCase() === 'true' || r.done === true || r['الحالة'] === 'تم');
-                    const notDoneRows = rows.filter(r => String(r.done).trim().toLowerCase() !== 'true' && r.done !== true && r['الحالة'] !== 'تم');
+                    // الفرز بناءً على العمود done
+                    const doneRows = rows.filter(r => String(r['done'] || '').trim().toUpperCase() === 'TRUE');
+                    const notDoneRows = rows.filter(r => String(r['done'] || '').trim().toUpperCase() !== 'TRUE');
                     
                     let singleCount = 0, repCount = 0;
                     doneRows.forEach(r => {
-                        const cost = r.cost || r['التكلفة'];
+                        const cost = r['التكلفة'] || r.cost || 0;
                         if (cost == 20) singleCount++;
                         else if (cost == 10) repCount++;
                     });
 
                     const renderTable = (dataArr, title, colorCode) => {
                         if(dataArr.length === 0) return '';
-                        let trs = dataArr.map(r => `
+                        let trs = dataArr.map(r => {
+                            const isDone = String(r['done'] || '').trim().toUpperCase() === 'TRUE';
+                            const checkboxHtml = isDone ? 
+                                '<input type="checkbox" checked onclick="return false;" style="accent-color: #1e3a8a;">' : 
+                                '<input type="checkbox" onclick="return false;">';
+
+                            return `
                             <tr>
-                                <td style="border:1px solid #1f2937; padding:5px;">${r.order_number||r['رقم الطلب']||''}</td>
-                                <td style="border:1px solid #1f2937; padding:5px;">${r.address||r['العنوان']||''}</td>
-                                <td style="border:1px solid #1f2937; padding:5px;">${r.design||r['التصميم']||''}</td>
-                                <td style="border:1px solid #1f2937; padding:5px;">${r.count||r['العدد']||''}</td>
-                                <td style="border:1px solid #1f2937; padding:5px;">${r.type||r['النوع']||''}</td>
-                                <td style="border:1px solid #1f2937; padding:5px;">${r.installer||r['المركب']||''}</td>
-                                <td style="border:1px solid #1f2937; padding:5px;">${r.n_order||r['رقم الطلب 2']||''}</td>
-                                <td style="border:1px solid #1f2937; padding:5px;">${r.data_of_dis||r['تاريخ التوزيع']||''}</td>
-                                <td style="border:1px solid #1f2937; padding:5px; color:${colorCode}; font-weight:bold;">${colorCode==='green'?'تم ✓':'لم يتم ✗'}</td>
-                                <td style="border:1px solid #1f2937; padding:5px;">${r.data_of_install||r['تاريخ التركيب']||''}</td>
-                                <td style="border:1px solid #1f2937; padding:5px;">${r.person||r['المندوب']||''}</td>
-                            </tr>
-                        `).join('');
+                                <td style="border:1px solid #1f2937; padding:4px;">${r['رقم الطلب'] || r.order_number || ''}</td>
+                                <td style="border:1px solid #1f2937; padding:4px;">${r['العنوان'] || r.address || ''}</td>
+                                <td style="border:1px solid #1f2937; padding:4px;">${r['التصميم'] || r.design || ''}</td>
+                                <td style="border:1px solid #1f2937; padding:4px;">${r['العدد'] || r.count || ''}</td>
+                                <td style="border:1px solid #1f2937; padding:4px;">${r['النوع'] || r.type || ''}</td>
+                                <td style="border:1px solid #1f2937; padding:4px;">${r['المركب'] || r.installer || ''}</td>
+                                <td style="border:1px solid #1f2937; padding:4px;">${r['رقم الطلب 2'] || r.n_order || ''}</td>
+                                <td style="border:1px solid #1f2937; padding:4px;">${r['تاريخ التوزيع'] || r.data_of_dis || ''}</td>
+                                <td style="border:1px solid #1f2937; padding:4px; text-align:center;">${checkboxHtml}</td>
+                                <td style="border:1px solid #1f2937; padding:4px;">${r['تاريخ التركيب'] || r.data_of_install || ''}</td>
+                                <td style="border:1px solid #1f2937; padding:4px;">${r['المندوب'] || r.person || ''}</td>
+                            </tr>`;
+                        }).join('');
+
                         return `
-                        <h3 style="color: ${colorCode}; font-size: 18px; font-weight: 900; margin: 20px 0 10px 0;">${title}</h3>
-                        <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; margin-bottom: 20px; page-break-inside: auto;">
+                        <h3 style="color: ${colorCode}; font-size: 16px; font-weight: 900; margin: 15px 0 10px 0;">${title}</h3>
+                        <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 11px; margin-bottom: 20px; page-break-inside: auto;">
                             <thead style="display: table-header-group;">
                                 <tr style="background-color: #1e3a8a; color: white;">
-                                    <th style="border:1px solid #1f2937; padding:6px;">رقم الطلب</th><th style="border:1px solid #1f2937; padding:6px;">العنوان</th><th style="border:1px solid #1f2937; padding:6px;">التصميم</th><th style="border:1px solid #1f2937; padding:6px;">العدد</th><th style="border:1px solid #1f2937; padding:6px;">النوع</th><th style="border:1px solid #1f2937; padding:6px;">المركب</th><th style="border:1px solid #1f2937; padding:6px;">رقم الطلب 2</th><th style="border:1px solid #1f2937; padding:6px;">تاريخ التوزيع</th><th style="border:1px solid #1f2937; padding:6px;">الحالة</th><th style="border:1px solid #1f2937; padding:6px;">تاريخ التركيب</th><th style="border:1px solid #1f2937; padding:6px;">المندوب</th>
+                                    <th style="border:1px solid #1f2937; padding:5px;">رقم الطلب</th>
+                                    <th style="border:1px solid #1f2937; padding:5px;">العنوان</th>
+                                    <th style="border:1px solid #1f2937; padding:5px;">التصميم</th>
+                                    <th style="border:1px solid #1f2937; padding:5px;">العدد</th>
+                                    <th style="border:1px solid #1f2937; padding:5px;">النوع</th>
+                                    <th style="border:1px solid #1f2937; padding:5px;">المركب</th>
+                                    <th style="border:1px solid #1f2937; padding:5px;">رقم الطلب 2</th>
+                                    <th style="border:1px solid #1f2937; padding:5px;">تاريخ التوزيع</th>
+                                    <th style="border:1px solid #1f2937; padding:5px;">done</th>
+                                    <th style="border:1px solid #1f2937; padding:5px;">تاريخ التركيب</th>
+                                    <th style="border:1px solid #1f2937; padding:5px;">المندوب</th>
                                 </tr>
                             </thead>
                             <tbody>${trs}</tbody>
@@ -424,17 +434,17 @@
                         </div>
                         
                         ${renderTable(doneRows, '• لوحات تم تسليمها (Done):', 'green')}
-                        ${renderTable(notDoneRows, '• لوحات لم يتم تسليمها (Not Done):', '#dc2626')}
+                        ${renderTable(notDoneRows, '• نواقص لم يتم تركيبها:', '#dc2626')}
 
-                        <h3 style="color: #1e3a8a; font-size: 18px; font-weight: 900; margin: 30px 0 10px 0; page-break-inside: avoid;">• ملخص الحساب (عن التسليمات المنفذة فقط):</h3>
-                        <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 16px; page-break-inside: avoid;">
+                        <h3 style="color: #1e3a8a; font-size: 16px; font-weight: 900; margin: 30px 0 10px 0; page-break-inside: avoid;">• ملخص الحساب (عن التسليمات المنفذة فقط):</h3>
+                        <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 14px; page-break-inside: avoid;">
                             <tr style="background:#e0f2fe; color: #1e3a8a;">
-                                <th style="border:2px solid black; padding:10px;">سعر الفردي</th><th style="border:2px solid black; padding:10px;">عدد الفردي</th><th style="border:2px solid black; padding:10px;">حساب الفردي</th><th style="border:2px solid black; padding:10px;">سعر المكرر</th><th style="border:2px solid black; padding:10px;">عدد المكرر</th><th style="border:2px solid black; padding:10px;">حساب المكرر</th><th style="border:2px solid black; padding:10px; background:#1e3a8a; color:white;">الإجمالي الكلي</th>
+                                <th style="border:2px solid black; padding:8px;">سعر الفردي</th><th style="border:2px solid black; padding:8px;">عدد الفردي</th><th style="border:2px solid black; padding:8px;">حساب الفردي</th><th style="border:2px solid black; padding:8px;">سعر المكرر</th><th style="border:2px solid black; padding:8px;">عدد المكرر</th><th style="border:2px solid black; padding:8px;">حساب المكرر</th><th style="border:2px solid black; padding:8px; background:#1e3a8a; color:white;">الإجمالي الكلي</th>
                             </tr>
                             <tr style="font-weight:bold;">
-                                <td style="border:2px solid black; padding:10px;">20</td><td style="border:2px solid black; padding:10px;">${singleCount}</td><td style="border:2px solid black; padding:10px;">${singleCount * 20}</td>
-                                <td style="border:2px solid black; padding:10px;">10</td><td style="border:2px solid black; padding:10px;">${repCount}</td><td style="border:2px solid black; padding:10px;">${repCount * 10}</td>
-                                <td style="border:2px solid black; padding:10px; font-size:22px; color:#1e3a8a; font-weight:900;">${(singleCount * 20) + (repCount * 10)} ر.س</td>
+                                <td style="border:2px solid black; padding:8px;">20</td><td style="border:2px solid black; padding:8px;">${singleCount}</td><td style="border:2px solid black; padding:8px;">${singleCount * 20}</td>
+                                <td style="border:2px solid black; padding:8px;">10</td><td style="border:2px solid black; padding:8px;">${repCount}</td><td style="border:2px solid black; padding:8px;">${repCount * 10}</td>
+                                <td style="border:2px solid black; padding:8px; font-size:18px; color:#1e3a8a; font-weight:900;">${(singleCount * 20) + (repCount * 10)} ر.س</td>
                             </tr>
                         </table>
                     `;
@@ -443,7 +453,6 @@
                 }
             }
 
-            // ضغط مساحة الـ ZIP بقوة عشان مياخدش وقت معاك
             const zipBlob = await zip.generateAsync({
                 type: "blob",
                 compression: "DEFLATE",
@@ -465,12 +474,12 @@
                 element.innerHTML = htmlString;
                 document.body.appendChild(element);
 
-                // رجعنا الاعدادات الاصلية عشان نتجنب الصفحات البيضا
+                // تقليل الحجم لضمان مساحة صغيرة جداً بدون ضياع الفوتر
                 const opt = {
-                    margin:       isMultiPage ? [10, 10, 20, 10] : [0, 0, 0, 0], // الهوامش صفر للمجمع عشان ميرحلش ورقة تانية
+                    margin:       isMultiPage ? [10, 10, 20, 10] : [0, 0, 0, 0], 
                     filename:     filename,
-                    image:        { type: 'jpeg', quality: 1 }, 
-                    html2canvas:  { scale: 2, useCORS: true }, 
+                    image:        { type: 'jpeg', quality: 0.65 }, // ضغط الصورة لتقليل الحجم
+                    html2canvas:  { scale: 1, useCORS: true }, // Scale 1 بيخلي الملف صغير جداً (أقل من ميجا)
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
                     pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
                 };
