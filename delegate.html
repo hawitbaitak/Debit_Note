@@ -18,58 +18,33 @@
             padding: 0;
         }
 
-        /* إعدادات الطباعة الصارمة - عرضي A4 Landscape ورقة واحدة فقط */
+        /* إعدادات الطباعة - عرضي A4 Landscape ورقة واحدة */
         @media print {
-            body {
-                background-color: white !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
+            body { background-color: white !important; margin: 0 !important; padding: 0 !important; }
             .no-print { display: none !important; }
             @page { size: A4 landscape; margin: 0; }
             
             .a4-landscape {
-                margin: 0 !important;
-                box-shadow: none !important;
-                width: 297mm !important;
-                height: 209mm !important; /* تقليل الارتفاع ملي لمنع الصفحة التانية */
-                border: none !important;
-                page-break-after: avoid !important;
-                page-break-inside: avoid !important;
+                margin: 0 !important; box-shadow: none !important; border: none !important;
+                width: 297mm !important; height: 209mm !important;
+                page-break-after: avoid !important; page-break-inside: avoid !important;
                 overflow: hidden !important;
             }
         }
 
         .a4-landscape {
-            width: 297mm;
-            height: 209mm;
-            margin: 20px auto;
-            background: white;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            position: relative;
-            box-sizing: border-box;
-            overflow: hidden;
-            padding: 12mm 15mm 0 15mm;
+            width: 297mm; height: 209mm; margin: 20px auto; background: white;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1); position: relative; box-sizing: border-box;
+            overflow: hidden; padding: 12mm 15mm 0 15mm;
         }
 
-        .excel-table-wrapper table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 11px;
-            margin-top: 1rem;
-        }
-        .excel-table-wrapper th, .excel-table-wrapper td {
-            border: 1px solid #1f2937;
-            padding: 6px;
-            text-align: center;
-        }
-        .excel-table-wrapper tr:first-child td, .excel-table-wrapper th {
-            background-color: #1e3a8a !important;
-            color: white !important;
-            font-weight: bold;
-        }
+        .excel-table-wrapper table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 1rem; }
+        .excel-table-wrapper th, .excel-table-wrapper td { border: 1px solid #1f2937; padding: 6px; text-align: center; }
+        .excel-table-wrapper th { background-color: #1e3a8a !important; color: white !important; font-weight: bold; }
+        
+        /* شريط التمرير لقائمة المناديب */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
 <body class="p-4 md:p-8 flex flex-col items-center">
@@ -82,11 +57,11 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">اسم المندوب</label>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">اسم المندوب (للملف الفردي)</label>
                 <input type="text" id="inputDelName" oninput="updatePreview()" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-900 outline-none" placeholder="مثال: صالح جبران">
             </div>
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">شهر الحساب</label>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">شهر الحساب (سيطبق على المجمع أيضاً)</label>
                 <input type="text" id="inputDelMonth" oninput="updatePreview()" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-900 outline-none" placeholder="أبريل 2026">
             </div>
         </div>
@@ -101,29 +76,39 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 border-t pt-6">
             <div>
                 <h3 class="font-bold text-blue-900 mb-2 italic">1. إرفاق جدول اللوحات (لهذا المندوب فقط):</h3>
-                <input type="file" id="inputExcel" accept=".xlsx,.xls,.csv" onchange="handleSingleExcel(event)" class="w-full text-sm">
+                <input type="file" id="inputExcel" accept=".xlsx,.xls,.csv" onchange="handleSingleExcel(event)" class="w-full text-sm border p-2 bg-white rounded">
+                <div class="mt-4 flex gap-2">
+                    <button onclick="window.print()" class="flex-1 bg-blue-900 text-white font-bold py-2 rounded flex items-center justify-center gap-2 hover:bg-blue-800 shadow">طباعة المندوب الحالي</button>
+                    <button onclick="resetForm()" class="px-4 bg-gray-200 text-gray-700 font-bold py-2 rounded hover:bg-gray-300">تفريغ</button>
+                </div>
             </div>
+
             <div>
                 <h3 class="font-bold text-blue-900 mb-2 italic">2. تصدير مجمع (رفع ملف كل المناديب):</h3>
-                <div class="bg-amber-50 border border-amber-200 p-2 rounded text-[11px] mb-2 text-amber-800">
-                    <strong>💡 ملاحظة لملف الإكسيل المجمع:</strong> يجب أن يحتوي الملف على العواميد بالترتيب التالي: (الاسم، الشهر، سعر الفردي، عدد الفردي، سعر المكرر، عدد المكرر).
+                <div class="bg-amber-50 border border-amber-200 p-3 rounded text-[12px] mb-3 text-amber-800 leading-relaxed shadow-sm">
+                    <strong>💡 هينت ترتيب عواميد الإكسيل:</strong><br>
+                    (اسم المندوب | سعر الفردي | ع الفردي | حساب الفردي | سعر المكرر | ع. المكرر | حساب المكرر | كل الحساب).<br>
+                    <span class="text-gray-600 font-bold">* شهر الحساب هيتم سحبه من المربع اللي فوق وتطبيقه على كل المناديب.</span>
                 </div>
-                <input type="file" id="inputBatchExcel" accept=".xlsx,.xls,.csv" onchange="handleBatchExcel(event)" class="w-full text-sm">
-                <div id="batchStatus" class="hidden mt-2 text-xs font-bold text-green-700 bg-green-50 p-2 rounded border border-green-200 flex justify-between items-center">
-                    <span id="batchCountText">تم العثور على 0 مندوب</span>
-                    <button onclick="exportAllBatch()" class="bg-green-700 text-white px-3 py-1 rounded">تصدير الكل PDF</button>
+                <input type="file" id="inputBatchExcel" accept=".xlsx,.xls,.csv" onchange="handleBatchExcel(event)" class="w-full text-sm border p-2 bg-white rounded cursor-pointer">
+                
+                <div id="batchStatus" class="hidden mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg shadow-inner">
+                    <div class="flex justify-between items-center mb-3 border-b border-blue-200 pb-3">
+                        <span id="batchCountText" class="text-sm font-black text-blue-900"></span>
+                        <button onclick="exportAllBatch()" class="bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded text-xs font-bold transition flex items-center gap-1 shadow-md">
+                            تصدير مجمع (ملف واحد)
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-gray-600 mb-2 font-bold bg-white p-1 rounded inline-block">أو تصدير كل مندوب في ملف مستقل (اسم المندوب - الشهر):</p>
+                    <div id="delegatesList" class="max-h-48 overflow-y-auto pr-2 custom-scroll space-y-2 mt-1">
+                        </div>
                 </div>
             </div>
-        </div>
-
-        <div class="mt-8 flex gap-3">
-            <button onclick="window.print()" class="flex-1 bg-blue-900 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 shadow-md">طباعة / حفظ المندوب الحالي</button>
-            <button onclick="resetForm()" class="px-6 bg-gray-100 text-gray-600 font-semibold py-3 rounded-lg">تفريغ</button>
         </div>
     </div>
 
     <div id="printArea" class="a4-landscape">
-        <img src="logo1.png" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[35%] opacity-[0.05] pointer-events-none z-0" alt="Watermark">
+        <img src="logo1.png" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[35%] opacity-[0.05] pointer-events-none z-0">
         
         <div class="relative z-10 flex justify-between items-end border-b-2 border-gray-400 pb-2 mb-4">
             <div class="w-1/3 text-right"><h1 class="text-2xl font-black text-gray-900">هوية بيتك</h1><p class="text-sm text-gray-700 font-bold">س.ت: 1010460174</p></div>
@@ -166,30 +151,26 @@
                     </tr>
                 </tbody>
             </table>
-
             <div id="excelTableContainer" class="excel-table-wrapper h-[85mm] overflow-hidden"></div>
         </div>
 
         <div class="absolute w-full left-0 right-0 px-16 z-20 flex justify-between items-end" style="bottom: 75px; box-sizing: border-box;">
-            
             <div class="text-center w-48">
                 <div class="border-t-2 border-gray-400 pt-2 relative z-10">
                     <p class="font-bold text-blue-900 text-lg">توقيع المستلم</p>
                     <p class="text-[10px] text-gray-500 mt-1">Recipient Signature</p>
                 </div>
             </div>
-
             <div class="text-center w-48 relative">
-                <img src="logo2.png" class="mx-auto h-24 w-24 object-contain mix-blend-multiply opacity-90 absolute bottom-12 left-1/2 transform -translate-x-1/2 z-0">
+                <img src="logo2.png" class="mx-auto h-24 w-24 object-contain mix-blend-multiply opacity-90 absolute bottom-12 left-1/2 transform -translate-x-1/2 z-0" onerror="this.style.display='none'">
                 <div class="border-t-2 border-blue-900/40 pt-2 relative z-10">
                     <p class="font-bold text-blue-900 text-lg">الختم الرسمي</p>
                     <p class="text-[10px] text-blue-900/50 mt-1">Official Stamp</p>
                 </div>
             </div>
-            
         </div>
 
-        <div class="absolute bottom-0 left-0 right-0 w-full flex justify-between items-end text-[10px] font-bold border-t-2 border-gray-400 pt-2 bg-white px-10 pb-4 z-10" style="height: 50px;">
+        <div class="absolute bottom-0 left-0 right-0 w-full flex justify-between items-end text-[10px] font-bold border-t-2 border-gray-400 pt-2 bg-white px-10 pb-4 z-10" style="height: 50px; box-sizing: border-box;">
             <div class="text-right leading-tight text-gray-800"><p>المملكة العربية السعودية</p><p>الرياض</p><p>جوال: 0544782301</p></div>
             <div class="text-left leading-tight text-gray-800" dir="ltr"><p>Saudi Arabia</p><p>Riyadh</p><p>Mobile: 0544782301</p></div>
         </div>
@@ -197,7 +178,9 @@
 
     <script>
         let batchData = [];
+        let globalMonth = "";
 
+        // تحديث المندوب الواحد في الواجهة
         function updatePreview() {
             const name = document.getElementById('inputDelName').value;
             const month = document.getElementById('inputDelMonth').value;
@@ -219,8 +202,11 @@
             document.getElementById('outRepCount').textContent = rCount;
             document.getElementById('outRepTotal').textContent = rTotal;
             document.getElementById('outGrandTotal').textContent = grand;
+
+            globalMonth = month || 'الشهر غير محدد';
         }
 
+        // إكسيل المندوب الواحد
         function handleSingleExcel(event) {
             const file = event.target.files[0];
             const container = document.getElementById('excelTableContainer');
@@ -228,86 +214,168 @@
             const reader = new FileReader();
             reader.onload = (e) => {
                 const workbook = XLSX.read(e.target.result, {type: 'array'});
-                const ws = workbook.Sheets[workbook.SheetNames[0]];
-                container.innerHTML = XLSX.utils.sheet_to_html(ws);
+                container.innerHTML = XLSX.utils.sheet_to_html(workbook.Sheets[workbook.SheetNames[0]]);
             };
             reader.readAsArrayBuffer(file);
         }
 
+        // إكسيل الدفعة المجمعة (البناء على العواميد المطلوبة)
         function handleBatchExcel(event) {
             const file = event.target.files[0];
             if(!file) return;
+            globalMonth = document.getElementById('inputDelMonth').value || 'الشهر غير محدد';
+            
             const reader = new FileReader();
             reader.onload = (e) => {
                 const workbook = XLSX.read(e.target.result, {type: 'array'});
                 const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
                 batchData = json;
-                document.getElementById('batchStatus').classList.remove('hidden');
-                document.getElementById('batchCountText').textContent = `تم العثور على ${json.length} مندوب`;
+                renderBatchList();
             };
             reader.readAsArrayBuffer(file);
         }
 
-        function exportAllBatch() {
-            if(batchData.length === 0) return;
-            const printWin = window.open('', '_blank');
-            let pagesHtml = '';
-            const today = new Date().toLocaleDateString('ar-SA');
+        // رسم قائمة المناديب للملفات المنفصلة
+        function renderBatchList() {
+            const statusDiv = document.getElementById('batchStatus');
+            const listDiv = document.getElementById('delegatesList');
+            const countText = document.getElementById('batchCountText');
+            
+            if (batchData.length === 0) {
+                statusDiv.classList.add('hidden');
+                return;
+            }
 
-            batchData.forEach(d => {
-                const sRate = d.singleRate || d['سعر الفردي'] || 0;
-                const sCount = d.singleCount || d['عدد الفردي'] || 0;
-                const rRate = d.repRate || d['سعر المكرر'] || 0;
-                const rCount = d.repCount || d['عدد المكرر'] || 0;
-                const sTotal = sRate * sCount;
-                const rTotal = rRate * rCount;
-                const grand = sTotal + rTotal;
+            statusDiv.classList.remove('hidden');
+            countText.textContent = `تم سحب ${batchData.length} مندوب بنجاح`;
+
+            let listHtml = '';
+            batchData.forEach((d, i) => {
+                // سحب القيم كما هي في الإكسيل
+                const name = d['اسم المندوب'] || d['الاسم'] || 'غير معروف';
+                const grand = d['كل الحساب'] !== undefined ? d['كل الحساب'] : 0;
                 
-                pagesHtml += `
-                <div style="width: 297mm; height: 208mm; padding: 12mm 15mm; position: relative; background: white; box-sizing: border-box; font-family: 'Noto Sans Arabic', sans-serif; direction: rtl; page-break-after: always; overflow: hidden;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #9ca3af; padding-bottom: 8px; margin-bottom: 15px;">
-                        <div style="text-align: right;"><div style="font-size: 20px; font-weight: 900;">هوية بيتك</div><div style="font-size: 12px;">س.ت: 1010460174</div></div>
-                        <img src="logo1.png" style="max-height: 50px;">
-                        <div style="text-align: left; direction: ltr;"><div style="font-size: 18px; font-weight: 900;">homeidentity</div><div style="font-size: 12px;">C.R: 1010460174</div></div>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #1e3a8a; padding-bottom: 8px; margin-bottom: 15px;">
-                        <div><div style="font-size: 24px; font-weight: 900; color: #1e3a8a;">حساب مندوب</div><div style="font-size: 12px; color: #6b7280;">Delegate Account</div></div>
-                        <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 5px 15px; border-radius: 5px; text-align: right;"><div style="font-size: 10px; color: #1e40af;">تاريخ الإصدار:</div><div style="font-weight: 700;">${today}</div></div>
-                    </div>
-                    <div style="display: flex; justify-content: center; gap: 40px; background: #f3f4f6; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db; margin-bottom: 15px;">
-                        <div style="font-size: 18px;"><b>اسم المندوب:</b> <span style="color:#1e3a8a; font-weight:900;">${d.name || d.الاسم || d['اسم المندوب'] || ''}</span></div>
-                        <div style="font-size: 18px;"><b>عن شهر:</b> <span style="color:#1e3a8a; font-weight:900;">${d.month || d.الشهر || d['شهر'] || ''}</span></div>
-                    </div>
-                    <table style="width: 100%; border-collapse: collapse; border: 2px solid black; text-align: center; font-size: 14px;">
-                        <tr style="background:#e5e7eb;">
-                            <th style="border:1px solid black; padding:8px;">سعر الفردي</th><th style="border:1px solid black; padding:8px;">ع الفردي</th><th style="border:1px solid black; padding:8px; color:#1e3a8a;">حساب الفردي</th>
-                            <th style="border:1px solid black; padding:8px;">سعر المكرر</th><th style="border:1px solid black; padding:8px;">ع المكرر</th><th style="border:1px solid black; padding:8px; color:#1e3a8a;">حساب المكرر</th>
-                            <th style="border:1px solid black; padding:8px; background:#dbeafe; font-weight:900;">كل الحساب</th>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid black; padding:8px;">${sRate}</td><td style="border:1px solid black; padding:8px;">${sCount}</td><td style="border:1px solid black; padding:8px; font-weight:bold;">${sTotal}</td>
-                            <td style="border:1px solid black; padding:8px;">${rRate}</td><td style="border:1px solid black; padding:8px;">${rCount}</td><td style="border:1px solid black; padding:8px; font-weight:bold;">${rTotal}</td>
-                            <td style="border:1px solid black; padding:8px; background:#dbeafe; font-size:20px; font-weight:900;">${grand}</td>
-                        </tr>
-                    </table>
-                    <div style="position: absolute; left: 40px; bottom: 65px; text-align: center; width: 150px;">
-                        <img src="logo2.png" style="display:block; margin: 0 auto; height: 80px; mix-blend-mode: multiply; opacity: 0.9; margin-bottom: -15px;">
-                        <div style="border-top: 2px solid rgba(30,58,138,0.3); padding-top: 5px;"><div style="font-weight: 900; color: #1e3a8a;">الختم الرسمي</div></div>
-                    </div>
-                    <div style="position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; font-size: 10px; border-top: 2px solid #9ca3af; padding: 10px 40px 15px; background: white;">
-                        <div>المملكة العربية السعودية <br> الرياض <br> جوال: 0544782301</div>
-                        <div dir="ltr">Saudi Arabia <br> Riyadh <br> Mobile: 0544782301</div>
-                    </div>
+                listHtml += `
+                <div class="flex items-center justify-between bg-white border border-gray-200 rounded p-2 shadow-sm">
+                    <div class="text-sm font-bold text-gray-800">${name} <span class="text-gray-300 mx-2">|</span> <span class="text-blue-900">الإجمالي: ${grand}</span></div>
+                    <button onclick="exportSingleFromBatch(${i})" class="bg-blue-100 hover:bg-blue-200 text-blue-900 px-3 py-1 rounded text-[11px] font-bold border border-blue-200 transition">تصدير ${name}</button>
                 </div>`;
             });
+            listDiv.innerHTML = listHtml;
+        }
 
-            printWin.document.write(`<html><head><title>تصدير مجمع</title><style>@page { size: A4 landscape; margin: 0; } body { margin: 0; }</style></head><body>${pagesHtml}</body></html>`);
+        // دالة توليد HTML للمندوب الواحد (للمجمع والفردي)
+        function generatePageHtml(d, today, month) {
+            // سحب القيم مباشر من العواميد
+            const sRate = d['سعر الفردي'] !== undefined ? d['سعر الفردي'] : 0;
+            const sCount = d['ع الفردي'] !== undefined ? d['ع الفردي'] : 0;
+            const sTotal = d['حساب الفردي'] !== undefined ? d['حساب الفردي'] : (sRate * sCount);
+            
+            const rRate = d['سعر المكرر'] !== undefined ? d['سعر المكرر'] : 0;
+            const rCount = d['ع. المكرر'] !== undefined ? d['ع. المكرر'] : (d['ع المكرر'] !== undefined ? d['ع المكرر'] : 0);
+            const rTotal = d['حساب المكرر'] !== undefined ? d['حساب المكرر'] : (rRate * rCount);
+            
+            const grand = d['كل الحساب'] !== undefined ? d['كل الحساب'] : (sTotal + rTotal);
+            const name = d['اسم المندوب'] || d['الاسم'] || '';
+
+            return `
+            <div style="width: 297mm; height: 209mm; padding: 12mm 15mm 0 15mm; position: relative; background: white; box-sizing: border-box; font-family: 'Noto Sans Arabic', sans-serif; direction: rtl; page-break-after: always; overflow: hidden;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #9ca3af; padding-bottom: 8px; margin-bottom: 15px;">
+                    <div style="text-align: right;"><div style="font-size: 20px; font-weight: 900;">هوية بيتك</div><div style="font-size: 12px; font-weight: bold;">س.ت: 1010460174</div></div>
+                    <img src="logo1.png" style="max-height: 50px;">
+                    <div style="text-align: left; direction: ltr;"><div style="font-size: 18px; font-weight: 900;">homeidentity</div><div style="font-size: 12px; font-weight: bold;">C.R: 1010460174</div></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #1e3a8a; padding-bottom: 8px; margin-bottom: 15px;">
+                    <div><div style="font-size: 24px; font-weight: 900; color: #1e3a8a;">حساب مندوب</div><div style="font-size: 12px; color: #6b7280; font-weight: bold; text-transform: uppercase;">Delegate Account</div></div>
+                    <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 5px 15px; border-radius: 5px; text-align: right;"><div style="font-size: 10px; color: #1e40af; font-weight: bold;">تاريخ الإصدار:</div><div style="font-weight: 700;">${today}</div></div>
+                </div>
+                <div style="display: flex; justify-content: center; gap: 40px; background: #f3f4f6; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db; margin-bottom: 15px;">
+                    <div style="font-size: 18px; font-weight: bold; color: #4b5563;">اسم المندوب: <span style="color:#1e3a8a; font-weight:900; margin-right:5px;">${name}</span></div>
+                    <div style="font-size: 18px; font-weight: bold; color: #4b5563;">عن شهر: <span style="color:#1e3a8a; font-weight:900; margin-right:5px;">${month}</span></div>
+                </div>
+                <table style="width: 100%; border-collapse: collapse; border: 2px solid black; text-align: center; font-size: 14px; background: white;">
+                    <tr style="background:#e5e7eb;">
+                        <th style="border:1px solid black; padding:8px; width: 14%;">سعر الفردي</th><th style="border:1px solid black; padding:8px; width: 14%;">ع الفردي</th><th style="border:1px solid black; padding:8px; color:#1e3a8a; width: 14%;">حساب الفردي</th>
+                        <th style="border:1px solid black; padding:8px; width: 14%;">سعر المكرر</th><th style="border:1px solid black; padding:8px; width: 14%;">ع المكرر</th><th style="border:1px solid black; padding:8px; color:#1e3a8a; width: 14%;">حساب المكرر</th>
+                        <th style="border:1px solid black; padding:8px; background:#dbeafe; font-weight:900; width: 16%;">كل الحساب</th>
+                    </tr>
+                    <tr>
+                        <td style="border:1px solid black; padding:8px; font-weight:bold;">${sRate}</td><td style="border:1px solid black; padding:8px; font-weight:bold;">${sCount}</td><td style="border:1px solid black; padding:8px; font-weight:bold; color:#1e3a8a;">${sTotal}</td>
+                        <td style="border:1px solid black; padding:8px; font-weight:bold;">${rRate}</td><td style="border:1px solid black; padding:8px; font-weight:bold;">${rCount}</td><td style="border:1px solid black; padding:8px; font-weight:bold; color:#1e3a8a;">${rTotal}</td>
+                        <td style="border:1px solid black; padding:8px; background:#dbeafe; font-size:20px; font-weight:900; color:#1e3a8a;">${grand}</td>
+                    </tr>
+                </table>
+                
+                <div style="position: absolute; left: 0; right: 0; padding: 0 64px; bottom: 75px; display: flex; justify-content: space-between; align-items: flex-end; box-sizing: border-box; z-index: 20;">
+                    <div style="text-align: center; width: 192px;">
+                        <div style="border-top: 2px solid #9ca3af; padding-top: 8px; position: relative; z-index: 10;">
+                            <div style="font-weight: bold; color: #1e3a8a; font-size: 18px;">توقيع المستلم</div>
+                            <div style="font-size: 10px; color: #6b7280; margin-top: 4px;">Recipient Signature</div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; width: 192px; position: relative;">
+                        <img src="logo2.png" style="display:block; margin: 0 auto; height: 96px; width: 96px; object-fit: contain; mix-blend-mode: multiply; opacity: 0.9; position: absolute; bottom: 48px; left: 50%; transform: translateX(-50%); z-index: 0;" onerror="this.style.display='none'">
+                        <div style="border-top: 2px solid rgba(30,58,138,0.4); padding-top: 8px; position: relative; z-index: 10;">
+                            <div style="font-weight: bold; color: #1e3a8a; font-size: 18px;">الختم الرسمي</div>
+                            <div style="font-size: 10px; color: rgba(30,58,138,0.5); margin-top: 4px;">Official Stamp</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: flex-end; font-size: 10px; font-weight: bold; border-top: 2px solid #9ca3af; padding: 8px 40px 16px; background: white; height: 50px; box-sizing: border-box; z-index: 10;">
+                    <div style="text-align: right; line-height: 1.5;"><div>المملكة العربية السعودية</div><div>الرياض</div><div>جوال: 0544782301</div></div>
+                    <div style="text-align: left; line-height: 1.5;" dir="ltr"><div>Saudi Arabia</div><div>Riyadh</div><div>Mobile: 0544782301</div></div>
+                </div>
+            </div>`;
+        }
+
+        // فتح نافذة الطباعة بعنوان مخصص
+        function openPrintWindow(htmlContent, pageTitle) {
+            const printWin = window.open('', '_blank');
+            if(!printWin) { alert("يرجى السماح بالنوافذ المنبثقة (Pop-ups) من المتصفح."); return; }
+            printWin.document.write(`
+                <html lang="ar" dir="rtl">
+                <head>
+                    <title>${pageTitle}</title>
+                    <link rel="preconnect" href="https://fonts.googleapis.com">
+                    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap" rel="stylesheet">
+                    <style>
+                        @page { size: A4 landscape; margin: 0; } 
+                        body { margin: 0; padding: 0; background-color: #525659; display: flex; flex-direction: column; align-items: center; }
+                        @media print { body { background-color: white; display: block; } }
+                    </style>
+                </head>
+                <body>
+                    ${htmlContent}
+                    <script> window.onload = function() { setTimeout(function() { window.print(); }, 500); } <\/script>
+                </body>
+                </html>
+            `);
             printWin.document.close();
-            setTimeout(() => { printWin.print(); }, 500);
+        }
+
+        // تصدير مجمع (كله في فايل واحد)
+        function exportAllBatch() {
+            if(batchData.length === 0) return;
+            let pagesHtml = '';
+            const today = new Date().toLocaleDateString('ar-SA');
+            batchData.forEach(d => { pagesHtml += generatePageHtml(d, today, globalMonth); });
+            openPrintWindow(pagesHtml, `حسابات المناديب المجمعة - ${globalMonth}`);
+        }
+
+        // تصدير مندوب واحد من القائمة (فايل باسمه والشهر)
+        function exportSingleFromBatch(index) {
+            const d = batchData[index];
+            if(!d) return;
+            const today = new Date().toLocaleDateString('ar-SA');
+            const name = d['اسم المندوب'] || d['الاسم'] || 'مندوب';
+            const html = generatePageHtml(d, today, globalMonth);
+            // ده هيخلي المتصفح يحفظ الـ PDF باسم (اسم المندوب - اسم الشهر)
+            openPrintWindow(html, `${name} - ${globalMonth}`);
         }
 
         function resetForm() {
-            document.querySelectorAll('input').forEach(i => i.value = '');
+            document.querySelectorAll('input[type="text"], input[type="number"]').forEach(i => i.value = '');
             document.getElementById('inputSingleRate').value = 20;
             document.getElementById('inputRepRate').value = 10;
             document.getElementById('excelTableContainer').innerHTML = '';
