@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إشعار خصم | مكاني</title>
+    <link rel="icon" type="image/png" href="noti.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans Arabic', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* إعدادات الطباعة الصارمة */
+        @media print {
+            body {
+                background-color: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .no-print { display: none !important; }
+            @page { size: A4 portrait; margin: 0; }
+            
+            .a4-page {
+                margin: 0 !important;
+                box-shadow: none !important;
+                width: 210mm !important;
+                height: 297mm !important; /* ارتفاع ثابت يمنع الصفحات الإضافية */
+                border: none !important;
+                page-break-after: avoid !important;
+                page-break-inside: avoid !important;
+            }
+        }
+
+        /* حاوية الورقة في العرض */
+        .a4-page {
+            width: 210mm;
+            height: 297mm; /* التزام تام بصفحة واحدة */
+            margin: 20px auto;
+            background: white;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            position: relative;
+            box-sizing: border-box;
+            overflow: hidden; /* يمنع خروج أي عنصر لصفحة جديدة */
+            padding: 15mm 15mm 0 15mm; /* بدون بادينج سفلي عشان العناصر الثابتة */
+        }
+
+        .data-label {
+            font-weight: bold;
+            color: #1e3a8a;
+            min-width: 140px;
+            display: inline-block;
+        }
+
+        .data-value {
+            color: #111827;
+            border-bottom: 1px dashed #d1d5db;
+            flex-grow: 1;
+            padding-right: 10px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col items-center">
+
+    <div class="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg mb-10 no-print border-t-4 border-blue-900">
+        <div class="flex justify-between items-center mb-6 border-b pb-3">
+            <h2 class="text-2xl font-bold text-gray-800">إعداد إشعار الخصم (ر.س)</h2>
+            <a href="index.html" class="text-sm bg-gray-200 text-gray-700 px-4 py-2 rounded font-bold hover:bg-gray-300 transition">العودة للرئيسية &larr;</a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">الاسم بالكامل</label>
+                <input type="text" id="inputName" oninput="updatePreview()" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-900 outline-none" placeholder="اسم العميل">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">رقم الطلب</label>
+                <input type="text" id="inputOrder" oninput="updatePreview()" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-900 outline-none" placeholder="مثلاً: ORDER-100">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">قيمة اللوحة الأساسية</label>
+                <input type="number" id="inputBase" oninput="updatePreview()" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-900 outline-none" placeholder="0.00">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">قيمة تصنيع اللوحة</label>
+                <input type="number" id="inputMfg" oninput="updatePreview()" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-900 outline-none" placeholder="0.00">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">قيمة الشحن</label>
+                <input type="number" id="inputShipping" oninput="updatePreview()" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-900 outline-none" placeholder="0.00">
+            </div>
+        </div>
+
+        <div class="mt-8 flex gap-3">
+            <button onclick="window.print()" class="flex-1 bg-blue-900 text-white font-bold py-3 rounded-lg hover:opacity-90 transition flex items-center justify-center gap-2 shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                طباعة / حفظ PDF
+            </button>
+            <button onclick="resetForm()" class="px-6 bg-gray-100 text-gray-600 font-semibold py-3 rounded-lg hover:bg-gray-200 transition">مسح البيانات</button>
+        </div>
+    </div>
+
+    <div id="printArea" class="a4-page">
+        <img src="logo1.png" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[50%] opacity-[0.05] pointer-events-none z-0" alt="Watermark" onerror="this.style.display='none'">
+        
+        <div class="relative z-10 flex justify-between items-end border-b-2 border-gray-400 pb-2 mb-6">
+            <div class="w-1/3 text-right">
+                <h1 class="text-2xl font-black text-gray-900">مكاني</h1>
+                <p class="text-sm text-gray-700 font-bold mt-1">س.ت: 1010460174</p>
+            </div>
+            <div class="w-1/3 flex justify-center pb-1">
+                <img src="logo1.png" alt="Logo" class="max-h-16 object-contain" onerror="this.style.display='none'">
+            </div>
+            <div class="w-1/3 text-left" dir="ltr">
+                <h1 class="text-xl font-black text-gray-900 tracking-tight">Makani</h1>
+                <p class="text-sm text-gray-700 font-bold mt-1">C.R: 1010460174</p>
+            </div>
+        </div>
+
+        <div class="relative z-10 flex justify-between items-center border-b-4 border-blue-900 pb-4 mb-10">
+            <div class="w-1/2">
+                <h1 class="text-3xl font-black text-blue-900 mb-1">إشعار خصم</h1>
+                <p class="text-lg text-amber-800 font-bold uppercase tracking-widest">Debit Note</p>
+            </div>
+            <div class="w-1/2 flex justify-end">
+                <div class="text-right bg-blue-50/50 p-3 rounded-lg border border-blue-100 flex gap-6">
+                    <div>
+                        <p class="font-bold text-sm text-blue-900/60">الرقم التسلسلي:</p>
+                        <p id="serialDisplay" class="text-lg font-mono font-bold text-amber-700">--------</p>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm text-blue-900/60">التاريخ:</p>
+                        <p id="dateDisplay" class="text-md font-bold text-gray-800 mt-1">--/--/----</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="relative z-10 space-y-8 mt-12 px-2">
+            <div class="flex items-end"><span class="data-label text-xl">السيد / السادة:</span><span id="displayName" class="data-value text-xl font-bold">..................................................................</span></div>
+            <div class="flex items-end"><span class="data-label text-xl">رقم الطلب:</span><span id="displayOrder" class="data-value text-xl font-bold">..................................................................</span></div>
+            
+            <div class="grid grid-cols-2 gap-10 pt-10">
+                <div class="border-r-4 border-amber-800/20 pr-6">
+                    <h3 class="text-lg font-bold text-amber-800 mb-4 border-b pb-2 border-amber-800/20">تفاصيل الفاتورة</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center"><span class="text-gray-600">قيمة اللوحة الأساسية:</span><span id="displayBase" class="font-bold text-lg text-blue-900">0.00 ر.س</span></div>
+                        <div class="flex justify-between items-center"><span class="text-gray-600">قيمة التصنيع:</span><span id="displayMfg" class="font-bold text-lg text-blue-900">0.00 ر.س</span></div>
+                        <div class="flex justify-between items-center"><span class="text-gray-600">قيمة الشحن:</span><span id="displayShipping" class="font-bold text-lg text-blue-900">0.00 ر.س</span></div>
+                    </div>
+                </div>
+                <div class="bg-amber-50 border-2 border-amber-200 p-6 rounded-2xl flex flex-col justify-center items-center shadow-inner">
+                    <p class="text-amber-900 font-bold text-xl mb-3">إجمالي مبلغ الخصم</p>
+                    <div class="flex items-baseline gap-2"><span id="totalDiscount" class="text-5xl font-black text-blue-900 tracking-tighter">0.00</span><span class="text-xl font-bold text-blue-900">ر.س</span></div>
+                    <p class="text-xs text-amber-800 mt-4 font-medium italic">* (قيمة التصنيع + تكاليف الشحن)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="absolute w-full px-16 z-20" style="bottom: calc(60px + 15mm); left: 0; box-sizing: border-box;">
+            <div class="grid grid-cols-2 gap-20 text-center">
+                <div class="relative pt-12">
+                    <div class="border-t-2 border-gray-400 pt-2 relative z-10">
+                        <p class="font-bold text-blue-900 text-lg">توقيع المستلم</p>
+                        <p class="text-xs text-gray-500 mt-1">Recipient Signature</p>
+                    </div>
+                </div>
+                <div class="relative">
+                    <img src="logo2.png" class="mx-auto h-28 w-28 object-contain mix-blend-multiply opacity-90 mb-[-30px] relative z-0 pointer-events-none" alt="Stamp" onerror="this.style.display='none'">
+                    <div class="border-t-2 border-blue-900/40 pt-2 relative z-10">
+                        <p class="font-bold text-blue-900 text-lg">الختم الرسمي</p>
+                        <p class="text-xs text-blue-900/50 mt-1">Official Stamp</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="absolute bottom-0 left-0 right-0 w-full flex justify-between items-end text-xs font-bold border-t-2 border-gray-400 pt-3 bg-white px-12 pb-6 z-10" style="height: 60px; box-sizing: border-box;">
+            <div class="text-right leading-tight text-gray-800">
+                <p>المملكة العربية السعودية</p>
+                <p>الرياض</p>
+                <p>جوال: 0544782301</p>
+            </div>
+            <div class="text-center w-full absolute bottom-6 left-0 text-blue-900/40 font-medium">هذا المستند صادر آلياً ولا يعتد به بدون الختم والتوقيع الرسمي</div>
+            <div class="text-left leading-tight text-gray-800" dir="ltr">
+                <p>Saudi Arabia</p>
+                <p>Riyadh</p>
+                <p>Mobile: 0544782301</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function generateSerial() {
+            const randomPart = Math.floor(1000 + Math.random() * 9000);
+            const datePart = new Date().getTime().toString().substr(-4);
+            return `SAR-DN-${datePart}-${randomPart}`;
+        }
+
+        function updatePreview() {
+            const name = document.getElementById('inputName').value;
+            const order = document.getElementById('inputOrder').value;
+            const base = parseFloat(document.getElementById('inputBase').value) || 0;
+            const mfg = parseFloat(document.getElementById('inputMfg').value) || 0;
+            const shipping = parseFloat(document.getElementById('inputShipping').value) || 0;
+            const total = mfg + shipping; // الإجمالي المخصوم حسب طلباتك السابقة
+
+            document.getElementById('displayName').textContent = name || "..................................................................";
+            document.getElementById('displayOrder').textContent = order || "..................................................................";
+            document.title = name ? "إشعار خصم - " + name : "إشعار خصم | مكاني";
+
+            const formatter = new Intl.NumberFormat('ar-SA', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('displayBase').textContent = formatter.format(base) + " ر.س";
+            document.getElementById('displayMfg').textContent = formatter.format(mfg) + " ر.س";
+            document.getElementById('displayShipping').textContent = formatter.format(shipping) + " ر.س";
+            document.getElementById('totalDiscount').textContent = formatter.format(total);
+        }
+
+        function resetForm() {
+            document.querySelectorAll('input').forEach(input => input.value = '');
+            updatePreview();
+            document.getElementById('serialDisplay').textContent = generateSerial();
+        }
+
+        window.onload = function() {
+            const today = new Date().toLocaleDateString('ar-SA');
+            document.getElementById('dateDisplay').textContent = today;
+            document.getElementById('serialDisplay').textContent = generateSerial();
+            updatePreview();
+        };
+    </script>
+</body>
+</html>
