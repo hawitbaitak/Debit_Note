@@ -15,7 +15,6 @@
     <style>
         body { font-family: 'Noto Sans Arabic', sans-serif; background-color: #f3f4f6; margin: 0; padding: 0; }
         
-        /* إعدادات الطباعة العادية للمعاينة الحية */
         @media print {
             body { background-color: white !important; margin: 0 !important; padding: 0 !important; }
             .no-print { display: none !important; }
@@ -42,28 +41,28 @@
 </head>
 <body class="p-4 md:p-8 flex flex-col items-center">
 
-    <div id="loadingOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-80 z-50 hidden flex-col items-center justify-center text-white backdrop-blur-sm">
+    <div id="loadingOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-80 z-50 hidden flex flex-col items-center justify-center text-white backdrop-blur-sm">
         <svg class="animate-spin h-14 w-14 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
         </svg>
-        <p class="text-2xl font-black mb-2">جاري تحضير وإصدار ملفات الـ PDF...</p>
-        <p class="text-md text-gray-300 font-bold">يرجى عدم إغلاق الصفحة حتى تكتمل عملية تحميل الـ ZIP</p>
+        <p class="text-2xl font-black mb-2">جاري ضغط ومعالجة ملفات الـ PDF...</p>
+        <p class="text-md text-gray-300 font-bold">يتم الآن إنشاء الـ ZIP بحجم مخفض، يرجى الانتظار</p>
     </div>
 
     <div class="w-full max-w-5xl bg-white p-6 rounded-xl shadow-lg mb-10 no-print border-t-4 border-blue-900">
         <div class="flex justify-between items-center mb-6 border-b pb-3">
-            <h2 class="text-2xl font-bold text-gray-800">إعداد حساب المندوب وتقرير اللوحات</h2>
+            <h2 class="text-2xl font-bold text-gray-800">إدارة حسابات المناديب والتركيبات</h2>
             <a href="index.html" class="text-sm bg-gray-200 text-gray-700 px-4 py-2 rounded font-bold hover:bg-gray-300 transition">العودة للرئيسية &larr;</a>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">اسم المندوب (للمعاينة الحالية)</label>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">اسم المندوب (للمعاينة)</label>
                 <input type="text" id="inputDelName" oninput="updatePreview()" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-900 outline-none" placeholder="مثال: صالح جبران">
             </div>
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">شهر الحساب (يُطبق على الجميع)</label>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">شهر الحساب</label>
                 <input type="text" id="inputDelMonth" oninput="updatePreview()" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-900 outline-none" value="أبريل 2026">
             </div>
         </div>
@@ -77,63 +76,50 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 border-t pt-6">
             <div class="bg-gray-50 p-4 rounded border border-gray-200">
-                <h3 class="font-bold text-blue-900 mb-2 italic text-sm">1. إرفاق جدول اللوحات (فردي):</h3>
-                <p class="text-[10px] text-gray-500 mb-2">للمعاينة المباشرة وتحويل المربعات لصح.</p>
+                <h3 class="font-bold text-blue-900 mb-2 italic text-sm">1. معاينة مندوب (فردي):</h3>
                 <input type="file" id="inputExcel" accept=".xlsx,.xls,.csv" onchange="handleSingleExcel(event)" class="w-full text-xs border p-2 bg-white rounded cursor-pointer">
-                <button onclick="window.print()" class="w-full mt-3 bg-blue-900 text-white font-bold py-2 rounded text-xs hover:bg-blue-800 shadow">طباعة المندوب الحالي</button>
+                <button onclick="window.print()" class="w-full mt-3 bg-blue-900 text-white font-bold py-2 rounded text-xs hover:bg-blue-800 shadow">طباعة المعاينة</button>
             </div>
 
             <div class="bg-amber-50 p-4 rounded border border-amber-200">
                 <h3 class="font-bold text-amber-900 mb-2 italic text-sm">2. تصدير حسابات مجمعة:</h3>
-                <p class="text-[10px] text-amber-700 mb-2 font-bold">لإصدار الحسابات المادية فقط (ورقة واحدة)</p>
                 <input type="file" id="inputBatchExcel" accept=".xlsx,.xls,.csv" onchange="handleBatchExcel(event)" class="w-full text-xs border p-2 bg-white rounded cursor-pointer">
                 <div id="batchStatus" class="hidden mt-3">
-                    <button onclick="generatePdfsZip('batch')" class="w-full bg-amber-700 text-white px-4 py-2 rounded text-xs font-bold transition shadow-md hover:bg-amber-800">
-                        تحميل المناديب منفردين (PDFs داخل ZIP)
-                    </button>
-                    <p id="batchCountText" class="text-center text-[11px] mt-2 font-bold text-gray-600"></p>
+                    <button onclick="generatePdfsZip('batch')" class="w-full bg-amber-700 text-white px-4 py-2 rounded text-xs font-bold transition shadow-md hover:bg-amber-800">تحميل حسابات ZIP</button>
                 </div>
             </div>
 
             <div class="bg-green-50 p-4 rounded border border-green-200">
                 <h3 class="font-bold text-green-900 mb-2 italic text-sm">3. فرز تقرير اللوحات (install):</h3>
-                <p class="text-[10px] text-green-700 mb-2 font-bold">بيفصل الـ Done والـ Not Done بعدة صفحات.</p>
                 <input type="file" id="inputInstallExcel" accept=".xlsx,.xls,.csv" onchange="handleInstallExcel(event)" class="w-full text-xs border p-2 bg-white rounded cursor-pointer">
                 <div id="installStatus" class="hidden mt-3">
-                    <button onclick="generatePdfsZip('install')" class="w-full bg-green-700 text-white px-4 py-2 rounded text-xs font-bold transition shadow-md hover:bg-green-800">
-                        تحميل تقارير اللوحات (PDFs داخل ZIP)
-                    </button>
-                    <p id="installCountText" class="text-center text-[11px] mt-2 font-bold text-gray-600"></p>
+                    <button onclick="generatePdfsZip('install')" class="w-full bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded text-xs font-bold transition shadow-md">تحميل تقارير لوحات ZIP</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="printArea" class="a4-landscape">
-        <img src="logo1.png" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[35%] opacity-[0.05] pointer-events-none z-0" onerror="this.style.display='none'">
-        
+        <img src="logo1.png" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[35%] opacity-[0.05] pointer-events-none z-0">
         <div class="relative z-10 flex justify-between items-end border-b-2 border-gray-400 pb-2 mb-4">
             <div class="w-1/3 text-right"><h1 class="text-2xl font-black text-gray-900">هوية بيتك</h1><p class="text-sm text-gray-700 font-bold mt-1">س.ت: 1010460174</p></div>
-            <div class="w-1/3 flex justify-center pb-1"><img src="logo1.png" alt="Logo" class="max-h-14 object-contain" onerror="this.style.display='none'"></div>
+            <div class="w-1/3 flex justify-center pb-1"><img src="logo1.png" alt="Logo" class="max-h-14"></div>
             <div class="w-1/3 text-left" dir="ltr"><h1 class="text-xl font-black text-gray-900 tracking-tight">homeidentity</h1><p class="text-sm text-gray-700 font-bold mt-1">C.R: 1010460174</p></div>
         </div>
-
         <div class="relative z-10 flex justify-between items-center border-b-4 border-blue-900 pb-2 mb-4">
             <div class="w-1/2"><h1 class="text-2xl font-black text-blue-900 mb-1">حساب مندوب</h1><p class="text-sm text-gray-500 font-bold uppercase tracking-widest">Delegate Account</p></div>
             <div class="text-right bg-blue-50 p-2 rounded-lg border border-blue-100"><p class="text-xs font-bold text-blue-900/60">تاريخ الإصدار:</p><p id="dateDisplay" class="font-bold text-gray-800"></p></div>
         </div>
-
         <div class="relative z-10">
             <div class="flex justify-center items-center mb-4 px-4 py-3 bg-gray-100 rounded-lg border border-gray-300 gap-10">
-                <div class="text-lg font-bold"><span class="text-gray-600">اسم المندوب:</span> <span id="outDelName" class="text-blue-900 text-xl font-black mx-2">................</span></div>
-                <div class="text-lg font-bold"><span class="text-gray-600">عن شهر:</span> <span id="outDelMonth" class="text-blue-900 text-xl font-black mx-2">................</span></div>
+                <div class="text-lg font-bold">اسم المندوب: <span id="outDelName" class="text-blue-900 text-xl font-black mx-2">................</span></div>
+                <div class="text-lg font-bold">عن شهر: <span id="outDelMonth" class="text-blue-900 text-xl font-black mx-2">................</span></div>
             </div>
-
             <table class="w-full border-collapse border-2 border-black text-center text-sm bg-white shadow-sm relative z-0">
                 <thead class="bg-gray-200">
                     <tr>
-                        <th class="border border-black p-2 text-gray-800 w-[14%]">سعر الفردي</th><th class="border border-black p-2 text-gray-800 w-[14%]">ع الفردي</th><th class="border border-black p-2 text-blue-900 w-[14%]">حساب الفردي</th>
-                        <th class="border border-black p-2 text-gray-800 w-[14%]">سعر المكرر</th><th class="border border-black p-2 text-gray-800 w-[14%]">ع المكرر</th><th class="border border-black p-2 text-blue-900 w-[14%]">حساب المكرر</th>
+                        <th class="border border-black p-2 w-[14%]">سعر الفردي</th><th class="border border-black p-2 w-[14%]">ع الفردي</th><th class="border border-black p-2 text-blue-900 w-[14%]">حساب الفردي</th>
+                        <th class="border border-black p-2 w-[14%]">سعر المكرر</th><th class="border border-black p-2 w-[14%]">ع المكرر</th><th class="border border-black p-2 text-blue-900 w-[14%]">حساب المكرر</th>
                         <th class="border border-black p-2 bg-blue-100 text-blue-900 font-black w-[16%]">كل الحساب</th>
                     </tr>
                 </thead>
@@ -145,22 +131,18 @@
                     </tr>
                 </tbody>
             </table>
-            <div id="excelTableContainer" class="excel-table-wrapper h-[70mm] overflow-hidden"></div>
+            <div id="excelTableContainer" class="excel-table-wrapper h-[80mm] overflow-hidden"></div>
         </div>
-
-        <div class="absolute w-full left-0 right-0 px-16 z-20 flex justify-between items-end" style="bottom: 75px; box-sizing: border-box;">
-            <div class="text-center w-48">
-                <div class="border-t-2 border-gray-400 pt-2 relative z-10"><p class="font-bold text-blue-900 text-lg">توقيع المستلم</p><p class="text-[10px] text-gray-500 mt-1">Recipient Signature</p></div>
-            </div>
-            <div class="text-center w-48 relative">
-                <img src="logo2.png" class="mx-auto h-24 w-24 object-contain mix-blend-multiply opacity-90 absolute bottom-12 left-1/2 transform -translate-x-1/2 z-0" onerror="this.style.display='none'">
-                <div class="border-t-2 border-blue-900/40 pt-2 relative z-10"><p class="font-bold text-blue-900 text-lg">الختم الرسمي</p><p class="text-[10px] text-blue-900/50 mt-1">Official Stamp</p></div>
+        <div class="absolute bottom-0 left-0 right-0 w-full px-16 z-20 flex justify-between items-end pb-12" style="bottom: 60px;">
+            <div class="text-center w-48 border-t-2 border-gray-400 pt-2"><p class="font-bold text-blue-900 text-lg">توقيع المستلم</p></div>
+            <div class="text-center w-48 relative border-t-2 border-blue-900/40 pt-2">
+                <img src="logo2.png" class="mx-auto h-24 w-24 object-contain mix-blend-multiply opacity-90 absolute bottom-12 left-1/2 transform -translate-x-1/2 z-0">
+                <p class="font-bold text-blue-900 text-lg">الختم الرسمي</p>
             </div>
         </div>
-
         <div class="absolute bottom-0 left-0 right-0 w-full flex justify-between items-end text-[10px] font-bold border-t-2 border-gray-400 pt-2 bg-white px-10 pb-4 z-10" style="height: 50px;">
-            <div class="text-right leading-tight text-gray-800"><p>المملكة العربية السعودية</p><p>الرياض</p><p>جوال: 0544782301</p></div>
-            <div class="text-left leading-tight text-gray-800" dir="ltr"><p>Saudi Arabia</p><p>Riyadh</p><p>Mobile: 0544782301</p></div>
+            <div>المملكة العربية السعودية | الرياض | جوال: 0544782301</div>
+            <div dir="ltr">Saudi Arabia | Riyadh | Mobile: 0544782301</div>
         </div>
     </div>
 
@@ -169,9 +151,6 @@
         let installData = [];
         let globalMonth = "أبريل 2026";
 
-        // =====================================
-        // المعاينة الحية
-        // =====================================
         function updatePreview() {
             const name = document.getElementById('inputDelName').value;
             globalMonth = document.getElementById('inputDelMonth').value || "أبريل 2026";
@@ -196,16 +175,16 @@
         function handleSingleExcel(event) {
             const file = event.target.files[0];
             const container = document.getElementById('excelTableContainer');
-            if (!file) { container.innerHTML = ''; return; }
+            if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
                 const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
                 container.innerHTML = XLSX.utils.sheet_to_html(workbook.Sheets[workbook.SheetNames[0]]);
                 const tds = container.querySelectorAll('td');
                 tds.forEach(td => {
-                    const text = td.innerText.trim().toUpperCase();
-                    if (text === 'TRUE') td.innerHTML = '<input type="checkbox" checked onclick="return false;" class="w-4 h-4 accent-blue-900 cursor-default">';
-                    else if (text === 'FALSE') td.innerHTML = '<input type="checkbox" onclick="return false;" class="w-4 h-4 accent-blue-900 cursor-default">';
+                    const txt = td.innerText.trim().toUpperCase();
+                    if (txt === 'TRUE') td.innerHTML = '<input type="checkbox" checked onclick="return false;" class="w-4 h-4 accent-blue-900">';
+                    else if (txt === 'FALSE') td.innerHTML = '<input type="checkbox" onclick="return false;" class="w-4 h-4 accent-blue-900">';
                 });
             };
             reader.readAsArrayBuffer(file);
@@ -213,122 +192,86 @@
 
         function handleBatchExcel(event) {
             const file = event.target.files[0];
-            if(!file) return;
             const reader = new FileReader();
             reader.onload = (e) => {
-                const workbook = XLSX.read(e.target.result, {type: 'array'});
-                batchData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                batchData = XLSX.utils.sheet_to_json(XLSX.read(e.target.result, {type: 'array'}).Sheets[0]);
                 document.getElementById('batchStatus').classList.remove('hidden');
-                document.getElementById('batchCountText').textContent = `جاهز لإصدار (${batchData.length}) ملف PDF`;
             };
             reader.readAsArrayBuffer(file);
         }
 
         function handleInstallExcel(event) {
             const file = event.target.files[0];
-            if(!file) return;
             const reader = new FileReader();
             reader.onload = (e) => {
-                const workbook = XLSX.read(e.target.result, {type: 'array'});
-                installData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                installData = XLSX.utils.sheet_to_json(XLSX.read(e.target.result, {type: 'array'}).Sheets[0]);
                 document.getElementById('installStatus').classList.remove('hidden');
-                const persons = new Set(installData.map(r => r.person || r['المندوب']).filter(Boolean));
-                document.getElementById('installCountText').textContent = `تم العثور على (${persons.size}) مناديب في الملف`;
             };
             reader.readAsArrayBuffer(file);
         }
 
-        // =====================================
-        // دالة إنشاء الهيكل للـ PDF (Multi-page support for Install)
-        // =====================================
-        function createHtmlForPdf(contentHtml, isMultiPage = false) {
-            const today = new Date().toLocaleDateString('ar-SA');
+        function getBaseLayout(contentHtml, isMultiPage = false) {
             return `
-            <div style="font-family: 'Noto Sans Arabic', Arial, sans-serif; direction: rtl; padding: 20px 30px; background: white; ${!isMultiPage ? 'width: 297mm; height: 209mm; box-sizing: border-box;' : ''}">
-                
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #9ca3af; padding-bottom: 10px; margin-bottom: 20px;">
-                    <div style="text-align: right;">
-                        <div style="font-size: 24px; font-weight: 900; color: #111827;">هوية بيتك</div>
-                        <div style="font-size: 14px; font-weight: bold; color: #374151;">س.ت: 1010460174</div>
-                    </div>
-                    <div style="text-align: center;"><img src="logo1.png" style="max-height: 55px;" onerror="this.style.display='none'"></div>
-                    <div style="text-align: left; direction: ltr;">
-                        <div style="font-size: 22px; font-weight: 900; color: #111827;">homeidentity</div>
-                        <div style="font-size: 14px; font-weight: bold; color: #374151;">C.R: 1010460174</div>
+            <div style="font-family: 'Noto Sans Arabic', Arial, sans-serif; direction: rtl; padding: 25px; background: white; ${!isMultiPage ? 'width: 297mm; height: 209mm; overflow:hidden; box-sizing: border-box;' : 'min-height:209mm;'} position: relative;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #9ca3af; padding-bottom: 8px; margin-bottom: 15px;">
+                    <div style="text-align: right;"><div style="font-size: 22px; font-weight: 900;">هوية بيتك</div><div style="font-size: 12px; font-weight: bold;">س.ت: 1010460174</div></div>
+                    <img src="logo1.png" style="max-height: 50px;">
+                    <div style="text-align: left; direction: ltr;"><div style="font-size: 20px; font-weight: 900;">homeidentity</div><div style="font-size: 12px; font-weight: bold;">C.R: 1010460174</div></div>
+                </div>
+                ${contentHtml}
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 50px; padding: 0 50px; page-break-inside: avoid;">
+                    <div style="text-align: center; width: 200px; border-top: 2px solid #9ca3af; pt-2"><div style="font-weight: bold; color: #1e3a8a; font-size: 18px;">توقيع المستلم</div></div>
+                    <div style="text-align: center; width: 200px; position: relative; border-top: 2px solid rgba(30,58,138,0.4); pt-2">
+                        <img src="logo2.png" style="height: 100px; object-fit: contain; mix-blend-mode: multiply; opacity: 0.9; position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 0;">
+                        <div style="font-weight: bold; color: #1e3a8a; font-size: 18px; position: relative; z-index: 10;">الختم الرسمي</div>
                     </div>
                 </div>
-
-                ${contentHtml}
-
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 60px; padding: 0 40px; page-break-inside: avoid;">
-                    <div style="text-align: center; width: 220px;">
-                        <div style="border-top: 2px solid #9ca3af; padding-top: 10px;">
-                            <div style="font-weight: bold; color: #1e3a8a; font-size: 20px;">توقيع المستلم</div>
-                            <div style="font-size: 12px; color: #6b7280; margin-top: 5px;">Recipient Signature</div>
-                        </div>
-                    </div>
-                    <div style="text-align: center; width: 220px; position: relative;">
-                        <img src="logo2.png" style="height: 110px; object-fit: contain; mix-blend-mode: multiply; opacity: 0.9; margin-bottom: -20px;" onerror="this.style.display='none'">
-                        <div style="border-top: 2px solid rgba(30,58,138,0.4); padding-top: 10px; position: relative; z-index: 10;">
-                            <div style="font-weight: bold; color: #1e3a8a; font-size: 20px;">الختم الرسمي</div>
-                            <div style="font-size: 12px; color: rgba(30,58,138,0.5); margin-top: 5px;">Official Stamp</div>
-                        </div>
-                    </div>
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; font-size: 10px; font-weight: bold; border-top: 2px solid #9ca3af; padding: 10px 40px; background: white; height: 45px;">
+                    <div>المملكة العربية السعودية | الرياض | 0544782301</div>
+                    <div dir="ltr">Saudi Arabia | Riyadh | 0544782301</div>
                 </div>
             </div>`;
         }
 
-        // =====================================
-        // دالة توليد PDF داخل ZIP باستخدام html2pdf.js
-        // =====================================
         async function generatePdfsZip(type) {
             const dataToProcess = type === 'batch' ? batchData : installData;
             if(dataToProcess.length === 0) return;
 
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-            document.getElementById('loadingOverlay').style.display = 'flex';
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.classList.remove('hidden');
             const zip = new JSZip();
 
             if (type === 'batch') {
-                for (let i = 0; i < batchData.length; i++) {
-                    const d = batchData[i];
-                    const name = d['اسم المندوب'] || d['الاسم'] || `مندوب_${i}`;
-                    const sRate = d['سعر الفردي'] || 0;
-                    const sCount = d['ع الفردي'] || 0;
-                    const rRate = d['سعر المكرر'] || 0;
-                    const rCount = d['ع. المكرر'] || d['ع المكرر'] || 0;
-                    const sTotal = d['حساب الفردي'] !== undefined ? d['حساب الفردي'] : (sRate * sCount);
-                    const rTotal = d['حساب المكرر'] !== undefined ? d['حساب المكرر'] : (rRate * rCount);
-                    const grand = d['كل الحساب'] !== undefined ? d['كل الحساب'] : (sTotal + rTotal);
-                    const today = new Date().toLocaleDateString('ar-SA');
-
-                    const content = `
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #1e3a8a; padding-bottom: 10px; margin-bottom: 20px;">
-                            <div><div style="font-size: 28px; font-weight: 900; color: #1e3a8a;">حساب مندوب</div><div style="font-size: 14px; color: #6b7280; font-weight: bold;">Delegate Account</div></div>
-                            <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 8px 20px; border-radius: 8px; text-align: right;"><div style="font-size: 12px; color: #1e40af; font-weight: bold;">تاريخ الإصدار:</div><div style="font-weight: 900; font-size: 16px;">${today}</div></div>
+                for (let d of batchData) {
+                    const name = d['اسم المندوب'] || d['الاسم'] || 'مندوب';
+                    const sRate = d['سعر الفردي'] || 0, sCount = d['ع الفردي'] || 0;
+                    const rRate = d['سعر المكرر'] || 0, rCount = d['ع. المكرر'] || d['ع المكرر'] || 0;
+                    const sTotal = d['حساب الفردي'] || (sRate * sCount), rTotal = d['حساب المكرر'] || (rRate * rCount);
+                    const grand = d['كل الحساب'] || (sTotal + rTotal);
+                    
+                    const html = `
+                        <div style="text-align:center; border-bottom:4px solid #1e3a8a; pb-2 mb-4">
+                            <h1 style="font-size:26px; color:#1e3a8a; m-0">حساب مندوب</h1>
                         </div>
-                        <div style="display: flex; justify-content: center; gap: 40px; background: #f3f4f6; padding: 15px; border-radius: 8px; border: 1px solid #d1d5db; margin-bottom: 30px;">
-                            <div style="font-size: 20px; font-weight: bold;">اسم المندوب: <span style="color:#1e3a8a; font-weight:900;">${name}</span></div>
-                            <div style="font-size: 20px; font-weight: bold;">عن شهر: <span style="color:#1e3a8a; font-weight:900;">${globalMonth}</span></div>
+                        <div style="display:flex; justify-content:center; gap:30px; background:#f3f4f6; p-3 border:1px solid #ccc; border-radius:8px; mb-4; font-size:18px; font-weight:bold;">
+                            <div>المندوب: <span style="color:#1e3a8a;">${name}</span></div>
+                            <div>عن شهر: <span style="color:#1e3a8a;">${globalMonth}</span></div>
                         </div>
-                        <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 16px;">
-                            <tr style="background:#e5e7eb;">
-                                <th style="border:2px solid black; padding:12px; color:#1e3a8a;">سعر الفردي</th><th style="border:2px solid black; padding:12px; color:#1e3a8a;">ع الفردي</th><th style="border:2px solid black; padding:12px; color:#1e3a8a;">حساب الفردي</th>
-                                <th style="border:2px solid black; padding:12px; color:#1e3a8a;">سعر المكرر</th><th style="border:2px solid black; padding:12px; color:#1e3a8a;">ع المكرر</th><th style="border:2px solid black; padding:12px; color:#1e3a8a;">حساب المكرر</th>
-                                <th style="border:2px solid black; padding:12px; background:#dbeafe; color:#1e3a8a;">كل الحساب</th>
+                        <table style="width:100%; border-collapse:collapse; text-align:center; font-size:15px;">
+                            <tr style="background:#1e3a8a; color:white;">
+                                <th style="border:1px solid black; p-2;">سعر الفردي</th><th style="border:1px solid black; p-2;">ع الفردي</th><th style="border:1px solid black; p-2;">حساب الفردي</th>
+                                <th style="border:1px solid black; p-2;">سعر المكرر</th><th style="border:1px solid black; p-2;">ع المكرر</th><th style="border:1px solid black; p-2;">حساب المكرر</th>
+                                <th style="border:1px solid black; p-2; background:#dbeafe; color:#1e3a8a;">كل الحساب</th>
                             </tr>
                             <tr style="font-weight:bold;">
-                                <td style="border:2px solid black; padding:12px;">${sRate}</td><td style="border:2px solid black; padding:12px;">${sCount}</td><td style="border:2px solid black; padding:12px;">${sTotal}</td>
-                                <td style="border:2px solid black; padding:12px;">${rRate}</td><td style="border:2px solid black; padding:12px;">${rCount}</td><td style="border:2px solid black; padding:12px;">${rTotal}</td>
-                                <td style="border:2px solid black; padding:12px; background:#dbeafe; font-size:24px; color:#1e3a8a; font-weight:900;">${grand}</td>
+                                <td style="border:1px solid black; p-2;">${sRate}</td><td style="border:1px solid black; p-2;">${sCount}</td><td style="border:1px solid black; p-2;">${sTotal}</td>
+                                <td style="border:1px solid black; p-2;">${rRate}</td><td style="border:1px solid black; p-2;">${rCount}</td><td style="border:1px solid black; p-2;">${rTotal}</td>
+                                <td style="border:1px solid black; p-2; background:#dbeafe; font-size:22px;">${grand}</td>
                             </tr>
-                        </table>
-                    `;
-                    const pdfBlob = await generatePdfBlob(createHtmlForPdf(content, false), `${name}_${globalMonth}.pdf`);
-                    zip.file(`${name} - ${globalMonth}.pdf`, pdfBlob);
+                        </table>`;
+                    zip.file(`${name} - ${globalMonth}.pdf`, await generatePdfBlob(getBaseLayout(html, false)));
                 }
-            } 
-            else if (type === 'install') {
+            } else {
                 const grouped = {};
                 installData.forEach(row => {
                     const p = row.person || row['المندوب'] || "غير محدد";
@@ -336,106 +279,61 @@
                     grouped[p].push(row);
                 });
 
-                for (const personName of Object.keys(grouped)) {
+                for (let personName in grouped) {
                     const rows = grouped[personName];
-                    const doneRows = rows.filter(r => String(r.done).trim().toLowerCase() === 'true' || r.done === true || r['الحالة'] === 'تم');
-                    const notDoneRows = rows.filter(r => String(r.done).trim().toLowerCase() !== 'true' && r.done !== true && r['الحالة'] !== 'تم');
-                    
-                    let singleCount = 0, repCount = 0;
-                    doneRows.forEach(r => {
-                        const cost = r.cost || r['التكلفة'];
-                        if (cost == 20) singleCount++;
-                        else if (cost == 10) repCount++;
-                    });
+                    const doneRows = rows.filter(r => String(r.done).toLowerCase() === 'true');
+                    const notDoneRows = rows.filter(r => String(r.done).toLowerCase() !== 'true');
+                    let sCount = 0, rCount = 0;
+                    doneRows.forEach(r => { if(r.cost == 20) sCount++; else if(r.cost == 10) rCount++; });
 
-                    const renderTable = (dataArr, title, colorCode) => {
-                        if(dataArr.length === 0) return '';
-                        let trs = dataArr.map(r => `
-                            <tr>
-                                <td style="border:1px solid #1f2937; padding:5px;">${r.order_number||r['رقم الطلب']||''}</td>
-                                <td style="border:1px solid #1f2937; padding:5px;">${r.address||r['العنوان']||''}</td>
-                                <td style="border:1px solid #1f2937; padding:5px;">${r.design||r['التصميم']||''}</td>
-                                <td style="border:1px solid #1f2937; padding:5px;">${r.count||r['العدد']||''}</td>
-                                <td style="border:1px solid #1f2937; padding:5px;">${r.type||r['النوع']||''}</td>
-                                <td style="border:1px solid #1f2937; padding:5px;">${r.installer||r['المركب']||''}</td>
-                                <td style="border:1px solid #1f2937; padding:5px;">${r.n_order||r['رقم الطلب 2']||''}</td>
-                                <td style="border:1px solid #1f2937; padding:5px;">${r.data_of_dis||r['تاريخ التوزيع']||''}</td>
-                                <td style="border:1px solid #1f2937; padding:5px; color:${colorCode}; font-weight:bold;">${colorCode==='green'?'تم ✓':'لم يتم ✗'}</td>
-                                <td style="border:1px solid #1f2937; padding:5px;">${r.data_of_install||r['تاريخ التركيب']||''}</td>
-                                <td style="border:1px solid #1f2937; padding:5px;">${r.person||r['المندوب']||''}</td>
-                            </tr>
-                        `).join('');
+                    const renderTable = (arr, title, color) => {
+                        if(arr.length === 0) return '';
                         return `
-                        <h3 style="color: ${colorCode}; font-size: 18px; font-weight: 900; margin: 20px 0 10px 0;">${title}</h3>
-                        <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; margin-bottom: 20px; page-break-inside: auto;">
-                            <thead style="display: table-header-group;">
-                                <tr style="background-color: #1e3a8a; color: white;">
-                                    <th style="border:1px solid #1f2937; padding:6px;">رقم الطلب</th><th style="border:1px solid #1f2937; padding:6px;">العنوان</th><th style="border:1px solid #1f2937; padding:6px;">التصميم</th><th style="border:1px solid #1f2937; padding:6px;">العدد</th><th style="border:1px solid #1f2937; padding:6px;">النوع</th><th style="border:1px solid #1f2937; padding:6px;">المركب</th><th style="border:1px solid #1f2937; padding:6px;">رقم الطلب 2</th><th style="border:1px solid #1f2937; padding:6px;">تاريخ التوزيع</th><th style="border:1px solid #1f2937; padding:6px;">الحالة</th><th style="border:1px solid #1f2937; padding:6px;">تاريخ التركيب</th><th style="border:1px solid #1f2937; padding:6px;">المندوب</th>
-                                </tr>
-                            </thead>
-                            <tbody>${trs}</tbody>
+                        <h3 style="color:${color}; border-right:4px solid ${color}; pr-2 mb-2 mt-4">${title}</h3>
+                        <table style="width:100%; border-collapse:collapse; font-size:10px; text-align:center;">
+                            <tr style="background:#eee;"><th>رقم الطلب</th><th>العنوان</th><th>التصميم</th><th>العدد</th><th>النوع</th><th>المركب</th><th>تاريخ التوزيع</th><th>الحالة</th><th>تاريخ التركيب</th></tr>
+                            ${arr.map(r => `<tr><td>${r.order_number||''}</td><td>${r.address||''}</td><td>${r.design||''}</td><td>${r.count||''}</td><td>${r.type||''}</td><td>${r.installer||''}</td><td>${r.data_of_dis||''}</td><td>${color==='green'?'تم':'نقص'}</td><td>${r.data_of_install||''}</td></tr>`).join('')}
                         </table>`;
                     };
 
-                    const today = new Date().toLocaleDateString('ar-SA');
-                    const content = `
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #1e3a8a; padding-bottom: 10px; margin-bottom: 20px;">
-                            <div><div style="font-size: 26px; font-weight: 900; color: #1e3a8a;">تقرير اللوحات والتركيبات</div><div style="font-size: 14px; color: #6b7280; font-weight: bold;">Installation Report</div></div>
-                            <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 8px 20px; border-radius: 8px; text-align: right;"><div style="font-size: 12px; color: #1e40af; font-weight: bold;">تاريخ التصدير:</div><div style="font-weight: 900; font-size: 16px;">${today}</div></div>
-                        </div>
-                        <div style="display: flex; justify-content: center; gap: 40px; background: #f3f4f6; padding: 15px; border-radius: 8px; border: 1px solid #d1d5db; margin-bottom: 20px;">
-                            <div style="font-size: 20px; font-weight: bold;">اسم المندوب: <span style="color:#1e3a8a; font-weight:900;">${personName}</span></div>
-                            <div style="font-size: 20px; font-weight: bold;">عن شهر: <span style="color:#1e3a8a; font-weight:900;">${globalMonth}</span></div>
-                        </div>
-                        
-                        ${renderTable(doneRows, '• لوحات تم تسليمها (Done):', 'green')}
-                        ${renderTable(notDoneRows, '• لوحات لم تسلم (Not Done):', 'red')}
-
-                        <h3 style="color: #1e3a8a; font-size: 18px; font-weight: 900; margin: 30px 0 10px 0; page-break-inside: avoid;">• ملخص الحساب (عن التسليمات المنفذة فقط):</h3>
-                        <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 16px; page-break-inside: avoid;">
-                            <tr style="background:#e0f2fe; color: #1e3a8a;">
-                                <th style="border:2px solid black; padding:10px;">سعر الفردي</th><th style="border:2px solid black; padding:10px;">عدد الفردي</th><th style="border:2px solid black; padding:10px;">حساب الفردي</th><th style="border:2px solid black; padding:10px;">سعر المكرر</th><th style="border:2px solid black; padding:10px;">عدد المكرر</th><th style="border:2px solid black; padding:10px;">حساب المكرر</th><th style="border:2px solid black; padding:10px; background:#1e3a8a; color:white;">الإجمالي الكلي</th>
-                            </tr>
-                            <tr style="font-weight:bold;">
-                                <td style="border:2px solid black; padding:10px;">20</td><td style="border:2px solid black; padding:10px;">${singleCount}</td><td style="border:2px solid black; padding:10px;">${singleCount * 20}</td>
-                                <td style="border:2px solid black; padding:10px;">10</td><td style="border:2px solid black; padding:10px;">${repCount}</td><td style="border:2px solid black; padding:10px;">${repCount * 10}</td>
-                                <td style="border:2px solid black; padding:10px; font-size:22px; color:#1e3a8a; font-weight:900;">${(singleCount * 20) + (repCount * 10)} ر.س</td>
-                            </tr>
-                        </table>
-                    `;
-                    const pdfBlob = await generatePdfBlob(createHtmlForPdf(content, true), `${personName}_${globalMonth}_تقرير_اللوحات.pdf`);
-                    zip.file(`${personName} - ${globalMonth} - تقرير اللوحات.pdf`, pdfBlob);
+                    const html = `
+                        <h2 style="text-align:center; color:#1e3a8a; border-bottom:3px solid #1e3a8a; pb-2">تقرير لوحات المندوب</h2>
+                        <div style="text-align:center; font-weight:bold; mb-4; font-size:16px;">المندوب: ${personName} | شهر: ${globalMonth}</div>
+                        ${renderTable(doneRows, 'لوحات تم تسليمها (Done):', 'green')}
+                        ${renderTable(notDoneRows, 'لوحات لم تسلم (Not Done):', 'red')}
+                        <h3 style="mt-6 border-right:4px solid #1e3a8a; pr-2">ملخص الحساب:</h3>
+                        <table style="width:100%; border-collapse:collapse; text-align:center; font-size:14px;">
+                            <tr style="background:#e0f2fe;"><th>سعر الفردي</th><th>عدد الفردي</th><th>حساب الفردي</th><th>سعر المكرر</th><th>عدد المكرر</th><th>حساب المكرر</th><th style="background:#1e3a8a; color:white;">الإجمالي</th></tr>
+                            <tr style="font-weight:bold;"><td>20</td><td>${sCount}</td><td>${sCount*20}</td><td>10</td><td>${rCount}</td><td>${rCount*10}</td><td style="color:#1e3a8a; font-size:18px;">${(sCount*20)+(rCount*10)}</td></tr>
+                        </table>`;
+                    zip.file(`${personName} - ${globalMonth} - تقرير اللوحات.pdf`, await generatePdfBlob(getBaseLayout(html, true)));
                 }
             }
 
-            const zipBlob = await zip.generateAsync({type: "blob"});
+            const blob = await zip.generateAsync({type: "blob"});
             const link = document.createElement("a");
-            link.href = URL.createObjectURL(zipBlob);
-            link.download = type === 'batch' ? `حسابات_المناديب_${globalMonth}.zip` : `تقارير_اللوحات_${globalMonth}.zip`;
+            link.href = URL.createObjectURL(blob);
+            link.download = `${type==='batch'?'حسابات':'تقارير'}_${globalMonth}.zip`;
             link.click();
-            
-            document.getElementById('loadingOverlay').style.display = 'none';
-            document.getElementById('loadingOverlay').classList.add('hidden');
+            overlay.classList.add('hidden');
         }
 
-        function generatePdfBlob(htmlString, filename) {
-            return new Promise((resolve) => {
-                const element = document.createElement('div');
-                element.innerHTML = htmlString;
-                document.body.appendChild(element);
-
+        function generatePdfBlob(html) {
+            return new Promise(resolve => {
+                const el = document.createElement('div');
+                el.innerHTML = html;
+                document.body.appendChild(el);
                 const opt = {
-                    margin:       [10, 10, 20, 10], // Margin bottom for multipage
-                    filename:     filename,
-                    image:        { type: 'jpeg', quality: 1 },
-                    html2canvas:  { scale: 2, useCORS: true },
-                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
-                    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+                    margin: 0,
+                    filename: 'file.pdf',
+                    image: { type: 'jpeg', quality: 0.7 }, // تقليل الجودة لتقليل الحجم
+                    html2canvas: { scale: 1.5, useCORS: true }, // تقليل السكيل لتقليل الحجم
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+                    pagebreak: { mode: 'avoid-all' }
                 };
-
-                html2pdf().set(opt).from(element).output('blob').then(function(blob) {
-                    document.body.removeChild(element);
-                    resolve(blob);
+                html2pdf().set(opt).from(el).toPdf().get('pdf').then(pdf => {
+                    document.body.removeChild(el);
+                    resolve(pdf.output('blob'));
                 });
             });
         }
