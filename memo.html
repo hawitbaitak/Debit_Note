@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مذكرة داخلية | مكاني</title>
+    <title>مذكرة داخلية | هوية بيتك</title>
     <link rel="icon" type="image/png" href="noti.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,12 +17,13 @@
             padding: 0;
         }
 
-        /* إعدادات الطباعة الصارمة */
         @media print {
             body {
                 background-color: white !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
             .no-print { display: none !important; }
             @page { size: A4 portrait; margin: 0; }
@@ -31,24 +32,23 @@
                 margin: 0 !important;
                 box-shadow: none !important;
                 width: 210mm !important;
-                height: 297mm !important; /* ارتفاع ثابت يمنع الصفحات الإضافية */
+                height: 296mm !important;
                 border: none !important;
                 page-break-after: avoid !important;
                 page-break-inside: avoid !important;
             }
         }
 
-        /* حاوية الورقة في العرض */
         .a4-page {
             width: 210mm;
-            height: 297mm; /* التزام تام بصفحة واحدة */
+            height: 296mm; 
             margin: 20px auto;
             background: white;
             box-shadow: 0 0 15px rgba(0,0,0,0.1);
             position: relative;
             box-sizing: border-box;
-            overflow: hidden; /* يمنع خروج أي عنصر لصفحة جديدة */
-            padding: 15mm 15mm 0 15mm;
+            overflow: hidden; 
+            padding: 15mm 15mm 0 15mm; 
         }
 
         .memo-table-header {
@@ -123,14 +123,14 @@
         
         <div class="relative z-10 flex justify-between items-end border-b-2 border-gray-400 pb-2 mb-6">
             <div class="w-1/3 text-right">
-                <h1 class="text-2xl font-black text-gray-900">مكاني</h1>
+                <h1 class="text-2xl font-black text-gray-900">هوية بيتك</h1>
                 <p class="text-sm text-gray-700 font-bold mt-1">س.ت: 1010460174</p>
             </div>
             <div class="w-1/3 flex justify-center pb-1">
                 <img src="logo1.png" alt="Logo" class="max-h-16 object-contain" onerror="this.style.display='none'">
             </div>
             <div class="w-1/3 text-left" dir="ltr">
-                <h1 class="text-xl font-black text-gray-900 tracking-tight">Makani</h1>
+                <h1 class="text-xl font-black text-gray-900 tracking-tight">homeidentity</h1>
                 <p class="text-sm text-gray-700 font-bold mt-1">C.R: 1010460174</p>
             </div>
         </div>
@@ -184,15 +184,17 @@
             </div>
         </div>
 
-        <div class="absolute left-16 z-20" style="bottom: calc(60px + 15mm); width: 160px; text-align: center; box-sizing: border-box;">
-            <img src="logo2.png" class="mx-auto h-28 w-28 object-contain mix-blend-multiply opacity-90 mb-[-30px] relative z-0 pointer-events-none" alt="Stamp" onerror="this.style.display='none'">
-            <div class="border-t-2 border-blue-900/40 pt-2 relative z-10">
-                <p class="font-bold text-blue-900 text-lg">الختم الرسمي</p>
-                <p class="text-xs text-blue-900/50 mt-1">Official Stamp</p>
+        <div class="absolute w-full left-0 right-0 px-16 z-20 flex justify-end items-end" style="bottom: 75px; box-sizing: border-box;">
+            <div class="text-center w-48 relative">
+                <img src="logo2.png" class="mx-auto h-24 w-24 object-contain mix-blend-multiply opacity-90 absolute bottom-12 left-1/2 transform -translate-x-1/2 z-0" alt="Stamp" onerror="this.style.display='none'">
+                <div class="border-t-2 border-blue-900/40 pt-2 relative z-10">
+                    <p class="font-bold text-blue-900 text-lg">الختم الرسمي</p>
+                    <p class="text-xs text-blue-900/50 mt-1">Official Stamp</p>
+                </div>
             </div>
         </div>
 
-        <div class="absolute bottom-0 left-0 right-0 w-full flex justify-between items-end text-xs font-bold border-t-2 border-gray-400 pt-3 bg-white px-12 pb-6 z-10" style="height: 60px; box-sizing: border-box;">
+        <div class="absolute bottom-0 left-0 right-0 h-[60px] flex justify-between items-end text-xs font-bold border-t-2 border-gray-400 pt-2 px-12 pb-5 bg-white z-10" style="box-sizing: border-box;">
             <div class="text-right leading-tight text-gray-800">
                 <p>المملكة العربية السعودية</p>
                 <p>الرياض</p>
