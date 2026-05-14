@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مذكرة داخلية | مكاني</title>
+    <link rel="icon" type="image/png" href="noti.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans Arabic', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* إعدادات الطباعة الصارمة */
+        @media print {
+            body {
+                background-color: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .no-print { display: none !important; }
+            @page { size: A4 portrait; margin: 0; }
+            
+            .a4-page {
+                margin: 0 !important;
+                box-shadow: none !important;
+                width: 210mm !important;
+                height: 297mm !important; /* ارتفاع ثابت يمنع الصفحات الإضافية */
+                border: none !important;
+                page-break-after: avoid !important;
+                page-break-inside: avoid !important;
+            }
+        }
+
+        /* حاوية الورقة في العرض */
+        .a4-page {
+            width: 210mm;
+            height: 297mm; /* التزام تام بصفحة واحدة */
+            margin: 20px auto;
+            background: white;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            position: relative;
+            box-sizing: border-box;
+            overflow: hidden; /* يمنع خروج أي عنصر لصفحة جديدة */
+            padding: 15mm 15mm 0 15mm;
+        }
+
+        .memo-table-header {
+            background-color: #111827 !important;
+            color: white !important;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col items-center">
+
+    <div class="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg mb-10 no-print border-t-4 border-amber-600">
+        <div class="flex justify-between items-center mb-6 border-b pb-3">
+            <h2 class="text-2xl font-bold text-gray-800">إعداد المذكرة الداخلية</h2>
+            <a href="index.html" class="text-sm bg-gray-200 text-gray-700 px-4 py-2 rounded font-bold hover:bg-gray-300 transition">العودة للرئيسية &larr;</a>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-6 mb-8 bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <label class="flex items-center gap-2 cursor-pointer font-bold text-gray-700 hover:text-amber-600 transition">
+                <input type="radio" name="memoLang" value="both" checked onchange="updatePreview()" class="w-5 h-5 accent-amber-600"> عربي وإنجليزي
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer font-bold text-gray-700 hover:text-amber-600 transition">
+                <input type="radio" name="memoLang" value="ar" onchange="updatePreview()" class="w-5 h-5 accent-amber-600"> عربي فقط
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer font-bold text-gray-700 hover:text-amber-600 transition">
+                <input type="radio" name="memoLang" value="en" onchange="updatePreview()" class="w-5 h-5 accent-amber-600"> إنجليزي فقط
+            </label>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <div><label class="block text-xs font-bold text-gray-500 mb-1">من (عربي)</label><input type="text" id="inMemoFromAr" oninput="updatePreview()" value="إدارة الموارد البشرية" class="w-full border p-2 rounded focus:ring-2 focus:ring-amber-600 outline-none"></div>
+            <div><label class="block text-xs font-bold text-gray-500 mb-1">From (إنجليزي)</label><input type="text" id="inMemoFromEn" oninput="updatePreview()" value="Human Resources Department" class="w-full border p-2 rounded focus:ring-2 focus:ring-amber-600 outline-none text-left" dir="ltr"></div>
+            
+            <div><label class="block text-xs font-bold text-gray-500 mb-1">إلى (عربي)</label><input type="text" id="inMemoToAr" oninput="updatePreview()" value="جميع الموظفين" class="w-full border p-2 rounded focus:ring-2 focus:ring-amber-600 outline-none"></div>
+            <div><label class="block text-xs font-bold text-gray-500 mb-1">To (إنجليزي)</label><input type="text" id="inMemoToEn" oninput="updatePreview()" value="All Employees" class="w-full border p-2 rounded focus:ring-2 focus:ring-amber-600 outline-none text-left" dir="ltr"></div>
+            
+            <div><label class="block text-xs font-bold text-gray-500 mb-1">نسخة إلى (عربي)</label><input type="text" id="inMemoCcAr" oninput="updatePreview()" value="الإدارات المعنية" class="w-full border p-2 rounded focus:ring-2 focus:ring-amber-600 outline-none"></div>
+            <div><label class="block text-xs font-bold text-gray-500 mb-1">CC (إنجليزي)</label><input type="text" id="inMemoCcEn" oninput="updatePreview()" value="Relevant Departments" class="w-full border p-2 rounded focus:ring-2 focus:ring-amber-600 outline-none text-left" dir="ltr"></div>
+            
+            <div><label class="block text-xs font-bold text-gray-500 mb-1">الموضوع (عربي)</label><input type="text" id="inMemoSubAr" oninput="updatePreview()" value="إجازة عيد الفطر المبارك" class="w-full border p-2 rounded focus:ring-2 focus:ring-amber-600 outline-none"></div>
+            <div><label class="block text-xs font-bold text-gray-500 mb-1">Subject (إنجليزي)</label><input type="text" id="inMemoSubEn" oninput="updatePreview()" value="Eid Al-Fitr Holiday" class="w-full border p-2 rounded focus:ring-2 focus:ring-amber-600 outline-none text-left" dir="ltr"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div><label class="block text-sm font-bold text-gray-700 mb-1">العنوان الرئيسي (عربي)</label><input type="text" id="inMemoTitleAr" oninput="updatePreview()" value='" عيد مبارك "' class="w-full border p-2 rounded focus:ring-2 focus:ring-amber-600 outline-none text-center"></div>
+            <div><label class="block text-sm font-bold text-gray-700 mb-1">Main Title (English)</label><input type="text" id="inMemoTitleEn" oninput="updatePreview()" value='"Eid Mubarak"' class="w-full border p-2 rounded focus:ring-2 focus:ring-amber-600 outline-none text-center" dir="ltr"></div>
+            
+            <div><label class="block text-sm font-bold text-gray-700 mb-1">نص المذكرة (عربي)</label><textarea id="inMemoBodyAr" oninput="updatePreview()" rows="6" class="w-full border rounded p-3 focus:ring-2 focus:ring-amber-600 outline-none resize-none" placeholder="اكتب محتوى المذكرة بالعربية هنا...">بناءً على توجيهات الإدارة العليا، نود إحاطتكم علماً بأن إجازة عيد الفطر المبارك ستبدأ بمشيئة الله تعالى اعتباراً من...</textarea></div>
+            <div><label class="block text-sm font-bold text-gray-700 mb-1">Memo Body (English)</label><textarea id="inMemoBodyEn" oninput="updatePreview()" rows="6" class="w-full border rounded p-3 focus:ring-2 focus:ring-amber-600 outline-none resize-none text-left" dir="ltr" placeholder="Type English content here...">Based on the management directives, we would like to inform you that the Eid Al-Fitr holiday will begin on...</textarea></div>
+        </div>
+
+        <div class="mt-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <label class="block text-sm font-bold text-gray-700 mb-2 flex justify-between">
+                <span>حجم خط النص:</span><span id="fontSizeDisplay" class="text-amber-700 font-black">14px</span>
+            </label>
+            <input type="range" id="inputMemoFontSize" min="10" max="24" value="14" step="1" class="w-full cursor-pointer accent-amber-600" oninput="updatePreview()">
+            <div class="flex justify-between text-xs text-gray-500 mt-1"><span>أصغر (10)</span><span>أكبر (24)</span></div>
+        </div>
+
+        <div class="mt-8 flex gap-3">
+            <button onclick="window.print()" class="flex-1 bg-amber-600 text-white font-bold py-3 rounded-lg hover:opacity-90 transition flex items-center justify-center gap-2 shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                طباعة / حفظ PDF
+            </button>
+            <button onclick="resetForm()" class="px-6 bg-gray-100 text-gray-600 font-semibold py-3 rounded-lg hover:bg-gray-200 transition">مسح البيانات</button>
+        </div>
+    </div>
+
+    <div id="printArea" class="a4-page">
+        <img src="logo1.png" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[50%] opacity-[0.05] pointer-events-none z-0" alt="Watermark" onerror="this.style.display='none'">
+        
+        <div class="relative z-10 flex justify-between items-end border-b-2 border-gray-400 pb-2 mb-6">
+            <div class="w-1/3 text-right">
+                <h1 class="text-2xl font-black text-gray-900">مكاني</h1>
+                <p class="text-sm text-gray-700 font-bold mt-1">س.ت: 1010460174</p>
+            </div>
+            <div class="w-1/3 flex justify-center pb-1">
+                <img src="logo1.png" alt="Logo" class="max-h-16 object-contain" onerror="this.style.display='none'">
+            </div>
+            <div class="w-1/3 text-left" dir="ltr">
+                <h1 class="text-xl font-black text-gray-900 tracking-tight">Makani</h1>
+                <p class="text-sm text-gray-700 font-bold mt-1">C.R: 1010460174</p>
+            </div>
+        </div>
+
+        <div class="relative z-10">
+            <div class="text-center mb-4"><h2 class="text-lg font-bold text-blue-900">مذكرة داخلية / MEMO</h2></div>
+            
+            <table class="w-full border-collapse border-2 border-black text-sm mb-4 bg-white/80">
+                <tbody>
+                    <tr class="memo-table-header">
+                        <td class="memo-ar-cell border border-black p-2 font-bold w-[15%] text-center whitespace-nowrap">من</td>
+                        <td class="memo-ar-cell border border-black p-2 font-bold text-right" id="outMemoFromAr"></td>
+                        <td class="memo-en-cell border border-black p-2 font-bold text-left" dir="ltr" id="outMemoFromEn"></td>
+                        <td class="memo-en-cell border border-black p-2 font-bold w-[15%] text-center whitespace-nowrap" dir="ltr">From</td>
+                    </tr>
+                    <tr class="bg-white">
+                        <td class="memo-ar-cell border border-black p-2 text-center text-gray-600 font-semibold whitespace-nowrap">الى :</td>
+                        <td class="memo-ar-cell border border-black p-2 font-semibold text-right" id="outMemoToAr"></td>
+                        <td class="memo-en-cell border border-black p-2 font-semibold text-left" dir="ltr" id="outMemoToEn"></td>
+                        <td class="memo-en-cell border border-black p-2 text-center text-gray-600 font-semibold whitespace-nowrap" dir="ltr">To</td>
+                    </tr>
+                    <tr class="bg-gray-50">
+                        <td class="memo-ar-cell border border-black p-2 text-center text-gray-600 font-semibold whitespace-nowrap">نسخة الى :</td>
+                        <td class="memo-ar-cell border border-black p-2 font-semibold text-right" id="outMemoCcAr"></td>
+                        <td class="memo-en-cell border border-black p-2 font-semibold text-left" dir="ltr" id="outMemoCcEn"></td>
+                        <td class="memo-en-cell border border-black p-2 text-center text-gray-600 font-semibold whitespace-nowrap" dir="ltr">CC:</td>
+                    </tr>
+                    <tr class="bg-white">
+                        <td class="memo-ar-cell border border-black p-2 text-center text-gray-600 font-semibold whitespace-nowrap">الموضوع :</td>
+                        <td class="memo-ar-cell border border-black p-2 font-bold text-right" id="outMemoSubAr"></td>
+                        <td class="memo-en-cell border border-black p-2 font-bold text-left" dir="ltr" id="outMemoSubEn"></td>
+                        <td class="memo-en-cell border border-black p-2 text-center text-gray-600 font-semibold whitespace-nowrap" dir="ltr">Subject :</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="mb-4">
+                <div class="text-center mb-4">
+                    <h3 class="text-lg font-bold mb-1" id="outMemoTitleAr"></h3>
+                    <h3 class="text-lg font-bold" id="outMemoTitleEn"></h3>
+                </div>
+                
+                <div class="flex border border-black h-[400px] bg-white/80 overflow-hidden">
+                    <div id="memoBodyArWrapper" class="w-1/2 p-4 text-right border-l border-black overflow-hidden">
+                        <p id="outMemoBodyAr" class="whitespace-pre-wrap leading-relaxed text-gray-800 font-medium"></p>
+                    </div>
+                    <div id="memoBodyEnWrapper" class="w-1/2 p-4 text-left overflow-hidden" dir="ltr">
+                        <p id="outMemoBodyEn" class="whitespace-pre-wrap leading-relaxed text-gray-800 font-medium"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="absolute left-16 z-20" style="bottom: calc(60px + 15mm); width: 160px; text-align: center; box-sizing: border-box;">
+            <img src="logo2.png" class="mx-auto h-28 w-28 object-contain mix-blend-multiply opacity-90 mb-[-30px] relative z-0 pointer-events-none" alt="Stamp" onerror="this.style.display='none'">
+            <div class="border-t-2 border-blue-900/40 pt-2 relative z-10">
+                <p class="font-bold text-blue-900 text-lg">الختم الرسمي</p>
+                <p class="text-xs text-blue-900/50 mt-1">Official Stamp</p>
+            </div>
+        </div>
+
+        <div class="absolute bottom-0 left-0 right-0 w-full flex justify-between items-end text-xs font-bold border-t-2 border-gray-400 pt-3 bg-white px-12 pb-6 z-10" style="height: 60px; box-sizing: border-box;">
+            <div class="text-right leading-tight text-gray-800">
+                <p>المملكة العربية السعودية</p>
+                <p>الرياض</p>
+                <p>جوال: 0544782301</p>
+            </div>
+            <div class="text-left leading-tight text-gray-800" dir="ltr">
+                <p>Saudi Arabia</p>
+                <p>Riyadh</p>
+                <p>Mobile: 0544782301</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function updatePreview() {
+            document.getElementById('outMemoFromAr').textContent = document.getElementById('inMemoFromAr').value || ' ';
+            document.getElementById('outMemoFromEn').textContent = document.getElementById('inMemoFromEn').value || ' ';
+            document.getElementById('outMemoToAr').textContent = document.getElementById('inMemoToAr').value || ' ';
+            document.getElementById('outMemoToEn').textContent = document.getElementById('inMemoToEn').value || ' ';
+            document.getElementById('outMemoCcAr').textContent = document.getElementById('inMemoCcAr').value || ' ';
+            document.getElementById('outMemoCcEn').textContent = document.getElementById('inMemoCcEn').value || ' ';
+            document.getElementById('outMemoSubAr').textContent = document.getElementById('inMemoSubAr').value || ' ';
+            document.getElementById('outMemoSubEn').textContent = document.getElementById('inMemoSubEn').value || ' ';
+            document.getElementById('outMemoTitleAr').textContent = document.getElementById('inMemoTitleAr').value || ' ';
+            document.getElementById('outMemoTitleEn').textContent = document.getElementById('inMemoTitleEn').value || ' ';
+            
+            const bodyAr = document.getElementById('inMemoBodyAr').value;
+            const bodyEn = document.getElementById('inMemoBodyEn').value;
+            document.getElementById('outMemoBodyAr').textContent = bodyAr;
+            document.getElementById('outMemoBodyEn').textContent = bodyEn;
+            
+            const fontSize = document.getElementById('inputMemoFontSize').value;
+            document.getElementById('fontSizeDisplay').textContent = fontSize + "px";
+            document.getElementById('outMemoBodyAr').style.fontSize = fontSize + "px";
+            document.getElementById('outMemoBodyEn').style.fontSize = fontSize + "px";
+            
+            const memoLang = document.querySelector('input[name="memoLang"]:checked').value;
+            const cellsEn = document.querySelectorAll('.memo-en-cell');
+            const cellsAr = document.querySelectorAll('.memo-ar-cell');
+            const bodyEnWrap = document.getElementById('memoBodyEnWrapper');
+            const bodyArWrap = document.getElementById('memoBodyArWrapper');
+            const titleAr = document.getElementById('outMemoTitleAr');
+            const titleEn = document.getElementById('outMemoTitleEn');
+            
+            if (memoLang === 'both') {
+                cellsEn.forEach(c => c.style.display = ''); cellsAr.forEach(c => c.style.display = '');
+                bodyEnWrap.style.display = ''; bodyArWrap.style.display = '';
+                bodyEnWrap.className = 'w-1/2 p-4 text-left overflow-hidden'; 
+                bodyArWrap.className = 'w-1/2 p-4 text-right border-l border-black overflow-hidden';
+                titleAr.style.display = ''; titleEn.style.display = '';
+            } else if (memoLang === 'ar') {
+                cellsEn.forEach(c => c.style.display = 'none'); cellsAr.forEach(c => c.style.display = '');
+                bodyEnWrap.style.display = 'none'; bodyArWrap.style.display = '';
+                bodyArWrap.className = 'w-full p-4 text-right overflow-hidden'; 
+                titleAr.style.display = ''; titleEn.style.display = 'none';
+            } else if (memoLang === 'en') {
+                cellsEn.forEach(c => c.style.display = ''); cellsAr.forEach(c => c.style.display = 'none');
+                bodyEnWrap.style.display = ''; bodyArWrap.style.display = 'none';
+                bodyEnWrap.className = 'w-full p-4 text-left overflow-hidden'; 
+                titleAr.style.display = 'none'; titleEn.style.display = '';
+            }
+        }
+
+        function resetForm() {
+            document.querySelectorAll('input[type="text"], textarea').forEach(input => input.value = '');
+            document.getElementById('inputMemoFontSize').value = 14;
+            document.querySelector('input[value="both"]').checked = true;
+            updatePreview();
+        }
+
+        window.onload = function() {
+            updatePreview();
+        };
+    </script>
+</body>
+</html>
