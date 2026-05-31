@@ -319,14 +319,14 @@
             if (type === 'batch') {
                 for (let i = 0; i < batchData.length; i++) {
                     const d = batchData[i];
-                    const name = d['اسم المندوب'] || d['الاسم'] || `مندوب_${i}`;
-                    const sRate = d['سعر الفردي'] || 0;
-                    const sCount = d['ع الفردي'] || 0;
-                    const rRate = d['سعر المكرر'] || 0;
-                    const rCount = d['ع. المكرر'] || d['ع المكرر'] || 0;
-                    const sTotal = d['حساب الفردي'] !== undefined ? d['حساب الفردي'] : (sRate * sCount);
-                    const rTotal = d['حساب المكرر'] !== undefined ? d['حساب المكرر'] : (rRate * rCount);
-                    const grand = d['كل الحساب'] !== undefined ? d['كل الحساب'] : (sTotal + rTotal);
+                    const name = d['Delegate Name'] || d['اسم المندوب'] || d['الاسم'] || `مندوب_${i}`;
+                    const sRate = d['Single Price'] || d['سعر الفردي'] || 0;
+                    const sCount = d['Single_Count'] || d['ع الفردي'] || 0;
+                    const rRate = d['Repeated Price'] || d['سعر المكرر'] || 0;
+                    const rCount = d['Repeated_Count'] || d['ع. المكرر'] || d['ع المكرر'] || 0;
+                    const sTotal = d['Single Total'] !== undefined ? d['Single Total'] : (d['حساب الفردي'] !== undefined ? d['حساب الفردي'] : (sRate * sCount));
+                    const rTotal = d['Repeated Total'] !== undefined ? d['Repeated Total'] : (d['حساب المكرر'] !== undefined ? d['حساب المكرر'] : (rRate * rCount));
+                    const grand = d['Grand Total'] !== undefined ? d['Grand Total'] : (d['كل الحساب'] !== undefined ? d['كل الحساب'] : (sTotal + rTotal));
                     const today = new Date().toLocaleDateString('ar-SA');
 
                     const content = `
