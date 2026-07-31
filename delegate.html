@@ -17,7 +17,7 @@
         
         /* إعدادات الطباعة العادية للمعاينة الحية */
         @media print {
-            body { background-color: white !important; margin: 0 !important; padding: 0 !important; }
+            body { background-color: white !important; margin: 0 !important; padding: 0 !important; display: block !important; }
             .no-print { display: none !important; }
             @page { size: A4 landscape; margin: 0; }
             .a4-landscape {
@@ -118,6 +118,7 @@
         </div>
     </div>
 
+    <!-- Live Preview Area -->
     <div id="printArea" class="a4-landscape">
         <img src="logo1.png" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[35%] opacity-[0.05] pointer-events-none z-0" onerror="this.style.display='none'">
         
@@ -168,10 +169,13 @@
                 </tbody>
             </table>
             
-            <div id="excelTableContainer" class="excel-table-wrapper h-[55mm] overflow-hidden"></div>
+            <p class="text-[11px] text-red-600 font-bold mt-2 text-left w-full">* ملاحظة: التقرير يشمل تحديث أسعار الإضاءة المعتمدة ابتداءً من 21 / 7 / 2026</p>
+            
+            <div id="excelTableContainer" class="excel-table-wrapper h-[45mm] overflow-hidden mt-1"></div>
         </div>
 
-        <div class="absolute w-full left-0 right-0 px-16 z-20 flex justify-between items-end" style="bottom: 75px; box-sizing: border-box;">
+        <!-- تم رفع الفوتر والتوقيعات للأعلى هنا (bottom: 95px) -->
+        <div class="absolute w-full left-0 right-0 px-16 z-20 flex justify-between items-end" style="bottom: 95px; box-sizing: border-box;">
             <div class="text-center w-48">
                 <div class="border-t-2 border-gray-400 pt-2 relative z-10"><p class="font-bold text-blue-900 text-lg">توقيع المستلم</p><p class="text-[10px] text-gray-500 mt-1">Recipient Signature</p></div>
             </div>
@@ -181,7 +185,8 @@
             </div>
         </div>
 
-        <div class="absolute bottom-0 left-0 right-0 w-full flex justify-between items-end text-[10px] font-bold border-t-2 border-gray-400 pt-2 bg-white px-10 pb-4 z-10" style="height: 50px;">
+        <!-- تم رفع خط الفوتر للأعلى (bottom: 15px) -->
+        <div class="absolute left-0 right-0 w-full flex justify-between items-end text-[10px] font-bold border-t-2 border-gray-400 pt-2 bg-white px-10 pb-4 z-10" style="height: 50px; bottom: 15px;">
             <div class="text-right leading-tight text-gray-800"><p>المملكة العربية السعودية</p><p>الرياض</p><p>جوال: 0544782301</p></div>
             <div class="text-left leading-tight text-gray-800" dir="ltr"><p>Saudi Arabia</p><p>Riyadh</p><p>Mobile: 0544782301</p></div>
         </div>
@@ -296,7 +301,9 @@
                         </div>
                     </div>
                     ${contentHtml}
-                    <div style="position: absolute; bottom: 75px; left: 40px; right: 40px; display: flex; justify-content: space-between; align-items: flex-end; box-sizing: border-box;">
+                    
+                    <!-- تم رفع التوقيعات للأعلى (bottom: 95px) -->
+                    <div style="position: absolute; bottom: 95px; left: 40px; right: 40px; display: flex; justify-content: space-between; align-items: flex-end; box-sizing: border-box;">
                         <div style="text-align: center; width: 200px;">
                             <div style="border-top: 2px solid #9ca3af; padding-top: 10px;">
                                 <div style="font-weight: bold; color: #1e3a8a; font-size: 20px;">توقيع المستلم</div>
@@ -311,7 +318,9 @@
                             </div>
                         </div>
                     </div>
-                    <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 50px; display: flex; justify-content: space-between; align-items: flex-end; font-size: 10px; font-weight: bold; border-top: 2px solid #9ca3af; padding-top: 10px; padding-bottom: 15px; padding-left: 40px; padding-right: 40px; box-sizing: border-box;">
+
+                    <!-- تم رفع الفوتر للأعلى (bottom: 15px) -->
+                    <div style="position: absolute; bottom: 15px; left: 0; right: 0; height: 50px; display: flex; justify-content: space-between; align-items: flex-end; font-size: 10px; font-weight: bold; border-top: 2px solid #9ca3af; padding-top: 10px; padding-bottom: 0px; padding-left: 40px; padding-right: 40px; box-sizing: border-box;">
                         <div style="text-align: right; line-height: 1.2; color: #1f2937;"><div>المملكة العربية السعودية</div><div>الرياض</div><div>جوال: 0544782301</div></div>
                         <div style="text-align: left; line-height: 1.2; color: #1f2937;" dir="ltr"><div>Saudi Arabia</div><div>Riyadh</div><div>Mobile: 0544782301</div></div>
                     </div>
@@ -413,6 +422,9 @@
                                 <td style="border:2px solid black; padding:12px; background:#bfdbfe; font-size:22px; color:#1e3a8a; font-weight:900;">${grand}</td>
                             </tr>
                         </table>
+                        <div style="font-size: 13px; color: #dc2626; font-weight: bold; margin-top: 15px; text-align: right;">
+                            * ملاحظة: التقرير يشمل تحديث أسعار الإضاءة المعتمدة ابتداءً من 21 / 7 / 2026
+                        </div>
                     `;
                     const pdfBlob = await generatePdfBlob(createHtmlForPdf(content, false), `${name}_${globalMonth}.pdf`, false);
                     zip.file(`${name} - ${globalMonth}.pdf`, pdfBlob);
@@ -542,6 +554,9 @@
                                 <td style="border:2px solid black; padding:8px; background:#1e3a8a; font-size:16px; color:white; font-weight:900;">${grandTotal} ر.س</td>
                             </tr>
                         </table>
+                        <div style="font-size: 12px; color: #dc2626; font-weight: bold; margin-top: 10px; text-align: right; page-break-inside: avoid;">
+                            * ملاحظة: التقرير يشمل تحديث أسعار الإضاءة المعتمدة ابتداءً من 21 / 7 / 2026
+                        </div>
                     `;
                     const pdfBlob = await generatePdfBlob(createHtmlForPdf(content, true), `${personName}_${globalMonth}_تقرير_اللوحات.pdf`, true);
                     zip.file(`${personName} - ${globalMonth} - تقرير اللوحات.pdf`, pdfBlob);
@@ -563,10 +578,18 @@
             document.getElementById('loadingOverlay').classList.add('hidden');
         }
 
+        // التحديث الأساسي اللي حل مشكلة نزول المحتوى لأسفل الشاشة
         function generatePdfBlob(htmlString, filename, isMultiPage) {
             return new Promise((resolve) => {
                 const element = document.createElement('div');
                 element.innerHTML = htmlString;
+                
+                // عزل العنصر عن الـ Flexbox الخاص بالصفحة الرئيسية تماماً
+                element.style.position = 'absolute';
+                element.style.top = '-9999px';
+                element.style.left = '-9999px';
+                element.style.backgroundColor = 'white';
+                
                 document.body.appendChild(element);
 
                 const opt = {
