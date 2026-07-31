@@ -41,8 +41,7 @@
 </head>
 <body class="p-4 md:p-8 flex flex-col items-center relative">
 
-    <!-- تم تعديل شاشة التحميل لتكون معتمة 100% (Solid) لإخفاء عملية بناء الـ PDF خلفها -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-gray-900 z-50 hidden flex-col items-center justify-center text-white">
+    <div id="loadingOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-90 z-50 hidden flex-col items-center justify-center text-white backdrop-blur-sm">
         <svg class="animate-spin h-14 w-14 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
@@ -68,6 +67,7 @@
             </div>
         </div>
 
+        <!-- أسعار وكميات اللوحات العادية -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <div><label class="block text-xs font-bold text-blue-900 mb-1">سعر الفردي (عادي)</label><input type="number" id="inputNormSingleRate" oninput="updatePreview()" class="w-full border p-2 rounded text-center font-bold" value="20"></div>
             <div><label class="block text-xs font-bold text-blue-900 mb-1">عدد الفردي (عادي)</label><input type="number" id="inputNormSingleCount" oninput="updatePreview()" class="w-full border p-2 rounded text-center font-bold" value="0"></div>
@@ -75,6 +75,7 @@
             <div><label class="block text-xs font-bold text-blue-900 mb-1">عدد المكرر (عادي)</label><input type="number" id="inputNormRepCount" oninput="updatePreview()" class="w-full border p-2 rounded text-center font-bold" value="0"></div>
         </div>
 
+        <!-- أسعار وكميات لوحات الإضاءة -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-amber-50 rounded-lg border border-amber-200">
             <div><label class="block text-xs font-bold text-amber-900 mb-1">سعر الفردي (إضاءة)</label><input type="number" id="inputLightSingleRate" oninput="updatePreview()" class="w-full border p-2 rounded text-center font-bold" value="25"></div>
             <div><label class="block text-xs font-bold text-amber-900 mb-1">عدد الفردي (إضاءة)</label><input type="number" id="inputLightSingleCount" oninput="updatePreview()" class="w-full border p-2 rounded text-center font-bold" value="0"></div>
@@ -116,7 +117,7 @@
         </div>
     </div>
 
-    <!-- منطقة المعاينة المباشرة (والتي تستخدم عند الطباعة اليدوية) -->
+    <!-- منطقة المعاينة المباشرة (Live Preview) -->
     <div id="printArea" class="a4-landscape bg-white">
         <img src="logo1.png" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[35%] opacity-[0.05] pointer-events-none z-0" onerror="this.style.display='none'">
         
@@ -171,7 +172,7 @@
             <div id="excelTableContainer" class="excel-table-wrapper h-[45mm] overflow-hidden mt-1"></div>
         </div>
 
-        <div class="absolute w-full left-0 right-0 px-16 z-20 flex justify-between items-end" style="bottom: 75px; box-sizing: border-box;">
+        <div class="absolute w-full left-0 right-0 px-16 z-20 flex justify-between items-end" style="bottom: 90px; box-sizing: border-box;">
             <div class="text-center w-48">
                 <div class="border-t-2 border-gray-400 pt-2 relative z-10"><p class="font-bold text-blue-900 text-lg">توقيع المستلم</p><p class="text-[10px] text-gray-500 mt-1">Recipient Signature</p></div>
             </div>
@@ -181,8 +182,8 @@
             </div>
         </div>
 
-        <!-- الفوتر: تم زيادة الارتفاع لرفع الخط، وزيادة padding-top لإبعاد الكلام للأسفل -->
-        <div class="absolute left-0 right-0 w-full flex justify-between items-start text-[10px] font-bold border-t-2 border-gray-400 pt-4 bg-white px-10 z-10" style="height: 60px; bottom: 0;">
+        <!-- الفوتر: مرفوع عن نهاية الصفحة، ومسافة pt-5 لرفع الخط عن الكلام -->
+        <div class="absolute left-0 right-0 w-full flex justify-between items-start text-[11px] font-bold border-t-2 border-gray-400 pt-5 bg-white px-10 z-10" style="bottom: 20px;">
             <div class="text-right leading-tight text-gray-800"><p>المملكة العربية السعودية</p><p>الرياض</p><p>جوال: 0544782301</p></div>
             <div class="text-left leading-tight text-gray-800" dir="ltr"><p>Saudi Arabia</p><p>Riyadh</p><p>Mobile: 0544782301</p></div>
         </div>
@@ -284,7 +285,7 @@
             
             if (!isMultiPage) {
                 return `
-                <div style="font-family: 'Noto Sans Arabic', Arial, sans-serif; direction: rtl; width: 297mm; height: 209mm; padding: 12mm 15mm 0 15mm; box-sizing: border-box; background: white; position: relative; overflow: hidden;">
+                <div style="font-family: 'Noto Sans Arabic', Arial, sans-serif; direction: rtl; width: 297mm; height: 210mm; padding: 12mm 15mm 0 15mm; box-sizing: border-box; background-color: #ffffff; position: relative; overflow: hidden; margin: 0; border: none;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #9ca3af; padding-bottom: 10px; margin-bottom: 20px;">
                         <div style="text-align: right;">
                             <div style="font-size: 24px; font-weight: 900; color: #111827;">هوية بيتك</div>
@@ -298,7 +299,7 @@
                     </div>
                     ${contentHtml}
                     
-                    <div style="position: absolute; bottom: 75px; left: 40px; right: 40px; display: flex; justify-content: space-between; align-items: flex-end; box-sizing: border-box;">
+                    <div style="position: absolute; bottom: 90px; left: 40px; right: 40px; display: flex; justify-content: space-between; align-items: flex-end; box-sizing: border-box;">
                         <div style="text-align: center; width: 200px;">
                             <div style="border-top: 2px solid #9ca3af; padding-top: 10px;">
                                 <div style="font-weight: bold; color: #1e3a8a; font-size: 20px;">توقيع المستلم</div>
@@ -314,15 +315,15 @@
                         </div>
                     </div>
 
-                    <!-- الفوتر المرفوع للورقة الواحدة -->
-                    <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 60px; display: flex; justify-content: space-between; align-items: flex-start; font-size: 11px; font-weight: bold; border-top: 2px solid #9ca3af; padding-top: 15px; padding-left: 40px; padding-right: 40px; box-sizing: border-box; background: white;">
-                        <div style="text-align: right; line-height: 1.4; color: #1f2937;"><div>المملكة العربية السعودية</div><div>الرياض</div><div>جوال: 0544782301</div></div>
-                        <div style="text-align: left; line-height: 1.4; color: #1f2937;" dir="ltr"><div>Saudi Arabia</div><div>Riyadh</div><div>Mobile: 0544782301</div></div>
+                    <!-- الفوتر: مسافة 20px لدفع النص للأسفل بعيد عن الخط العلوي -->
+                    <div style="position: absolute; bottom: 20px; left: 0; right: 0; display: flex; justify-content: space-between; align-items: flex-start; font-size: 11px; font-weight: bold; border-top: 2px solid #9ca3af; padding-top: 20px; padding-left: 40px; padding-right: 40px; box-sizing: border-box;">
+                        <div style="text-align: right; line-height: 1.5; color: #1f2937;"><div>المملكة العربية السعودية</div><div>الرياض</div><div>جوال: 0544782301</div></div>
+                        <div style="text-align: left; line-height: 1.5; color: #1f2937;" dir="ltr"><div>Saudi Arabia</div><div>Riyadh</div><div>Mobile: 0544782301</div></div>
                     </div>
                 </div>`;
             } else {
                 return `
-                <div style="font-family: 'Noto Sans Arabic', Arial, sans-serif; direction: rtl; padding: 20px 30px; background: white;">
+                <div style="font-family: 'Noto Sans Arabic', Arial, sans-serif; direction: rtl; padding: 20px 30px; background-color: #ffffff;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #9ca3af; padding-bottom: 10px; margin-bottom: 20px;">
                         <div style="text-align: right;">
                             <div style="font-size: 24px; font-weight: 900; color: #111827;">هوية بيتك</div>
@@ -351,10 +352,9 @@
                         </div>
                     </div>
                     
-                    <!-- الفوتر المرفوع للصفحات المتعددة -->
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 50px; font-size: 11px; font-weight: bold; border-top: 2px solid #9ca3af; padding-top: 15px; padding-left: 20px; padding-right: 20px; page-break-inside: avoid;">
-                        <div style="text-align: right; line-height: 1.4; color: #1f2937;"><div>المملكة العربية السعودية</div><div>الرياض</div><div>جوال: 0544782301</div></div>
-                        <div style="text-align: left; line-height: 1.4; color: #1f2937;" dir="ltr"><div>Saudi Arabia</div><div>Riyadh</div><div>Mobile: 0544782301</div></div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 50px; font-size: 11px; font-weight: bold; border-top: 2px solid #9ca3af; padding-top: 20px; padding-left: 20px; padding-right: 20px; page-break-inside: avoid;">
+                        <div style="text-align: right; line-height: 1.5; color: #1f2937;"><div>المملكة العربية السعودية</div><div>الرياض</div><div>جوال: 0544782301</div></div>
+                        <div style="text-align: left; line-height: 1.5; color: #1f2937;" dir="ltr"><div>Saudi Arabia</div><div>Riyadh</div><div>Mobile: 0544782301</div></div>
                     </div>
                 </div>`;
             }
@@ -372,6 +372,11 @@
                 for (let i = 0; i < batchData.length; i++) {
                     const d = batchData[i];
                     const name = d['Delegate Name'] || d['اسم المندوب'] || d['الاسم'] || `مندوب_${i}`;
+                    
+                    // تجاهل صف الإجمالي الكلي عشان ميطلّعش PDF فاضي أو غريب
+                    if (name === 'الإجمالي الكلي' || name === 'Grand Total') {
+                        continue;
+                    }
                     
                     const nSRate = d['Normal Single Price'] || 20;
                     const nSCount = d['Normal_Single_Count'] || d['ع الفردي'] || 0;
@@ -579,34 +584,20 @@
             document.getElementById('loadingOverlay').classList.add('hidden');
         }
 
-        // الحل الجذري لمنع الشاشة البيضاء أثناء استخراج الـ PDF
+        // الحل الجذري: إرسال النص (String) مباشرة دون أي محاولات إخفاء أو تعديل في الشاشة الأساسية
         function generatePdfBlob(htmlString, filename, isMultiPage) {
             return new Promise((resolve) => {
-                const element = document.createElement('div');
-                element.innerHTML = htmlString;
-                
-                // نضع العنصر في الصفحة بطريقة طبيعية ليقرأه المتصفح بشكل سليم 100%
-                element.style.position = 'absolute';
-                element.style.top = window.scrollY + 'px'; // تضمن إنه يظهر في نفس مكان وقوفك في الصفحة
-                element.style.left = '0';
-                element.style.width = '297mm';
-                element.style.backgroundColor = 'white';
-                // إعطاء العنصر z-index أقل من شاشة التحميل المعتمة (z-index: 50)، فيستخبى وراها تماماً!
-                element.style.zIndex = '10'; 
-                
-                document.body.appendChild(element);
-
                 const opt = {
                     margin:       isMultiPage ? [10, 10, 20, 10] : [0, 0, 0, 0], 
                     filename:     filename,
                     image:        { type: 'jpeg', quality: 1 },
-                    html2canvas:  { scale: 2, useCORS: true }, 
+                    html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' }, // يضمن خلفية بيضاء صافية 100%
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
                     pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
                 };
 
-                html2pdf().set(opt).from(element).output('blob').then(function(blob) {
-                    document.body.removeChild(element);
+                // إرسال النص (htmlString) بدلاً من العنصر يمنع تماماً الشاشات البيضاء أو قطع الهوامش
+                html2pdf().set(opt).from(htmlString).output('blob').then(function(blob) {
                     resolve(blob);
                 });
             });
