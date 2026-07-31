@@ -15,7 +15,6 @@
     <style>
         body { font-family: 'Noto Sans Arabic', sans-serif; background-color: #f3f4f6; margin: 0; padding: 0; }
         
-        /* إعدادات الطباعة العادية للمعاينة الحية */
         @media print {
             body { background-color: white !important; margin: 0 !important; padding: 0 !important; display: block !important; }
             .no-print { display: none !important; }
@@ -40,7 +39,7 @@
         .custom-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
-<body class="p-4 md:p-8 flex flex-col items-center">
+<body class="p-4 md:p-8 flex flex-col items-center relative">
 
     <div id="loadingOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-80 z-50 hidden flex-col items-center justify-center text-white backdrop-blur-sm">
         <svg class="animate-spin h-14 w-14 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -48,7 +47,7 @@
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
         </svg>
         <p class="text-2xl font-black mb-2">جاري تحضير وإصدار ملفات الـ PDF...</p>
-        <p class="text-md text-gray-300 font-bold">يرجى عدم إغلاق الصفحة حتى تكتمل عملية تحميل الـ ZIP</p>
+        <p class="text-md text-gray-300 font-bold">يرجى عدم إغلاق الصفحة حتى تكتمل العملية</p>
     </div>
 
     <div class="w-full max-w-5xl bg-white p-6 rounded-xl shadow-lg mb-10 no-print border-t-4 border-blue-900">
@@ -119,7 +118,7 @@
     </div>
 
     <!-- Live Preview Area -->
-    <div id="printArea" class="a4-landscape">
+    <div id="printArea" class="a4-landscape bg-white">
         <img src="logo1.png" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[35%] opacity-[0.05] pointer-events-none z-0" onerror="this.style.display='none'">
         
         <div class="relative z-10 flex justify-between items-end border-b-2 border-gray-400 pb-2 mb-4">
@@ -139,7 +138,6 @@
                 <div class="text-lg font-bold"><span class="text-gray-600">عن شهر:</span> <span id="outDelMonth" class="text-blue-900 text-xl font-black mx-2">................</span></div>
             </div>
 
-            <!-- جدول الحسابات المحدث -->
             <table class="w-full border-collapse border-2 border-black text-center text-sm bg-white shadow-sm relative z-0">
                 <thead class="bg-gray-200">
                     <tr>
@@ -174,8 +172,8 @@
             <div id="excelTableContainer" class="excel-table-wrapper h-[45mm] overflow-hidden mt-1"></div>
         </div>
 
-        <!-- تم رفع الفوتر والتوقيعات للأعلى هنا (bottom: 95px) -->
-        <div class="absolute w-full left-0 right-0 px-16 z-20 flex justify-between items-end" style="bottom: 95px; box-sizing: border-box;">
+        <!-- التوقيعات (مضبوطة لتبتعد عن الفوتر) -->
+        <div class="absolute w-full left-0 right-0 px-16 z-20 flex justify-between items-end" style="bottom: 75px; box-sizing: border-box;">
             <div class="text-center w-48">
                 <div class="border-t-2 border-gray-400 pt-2 relative z-10"><p class="font-bold text-blue-900 text-lg">توقيع المستلم</p><p class="text-[10px] text-gray-500 mt-1">Recipient Signature</p></div>
             </div>
@@ -185,8 +183,8 @@
             </div>
         </div>
 
-        <!-- تم رفع خط الفوتر للأعلى (bottom: 15px) -->
-        <div class="absolute left-0 right-0 w-full flex justify-between items-end text-[10px] font-bold border-t-2 border-gray-400 pt-2 bg-white px-10 pb-4 z-10" style="height: 50px; bottom: 15px;">
+        <!-- الفوتر: تم استخدام flex-start مع padding-top لإبعاد الكلام عن الخط -->
+        <div class="absolute left-0 right-0 w-full flex justify-between items-start text-[10px] font-bold border-t-2 border-gray-400 pt-3 bg-white px-10 z-10" style="height: 50px; bottom: 0;">
             <div class="text-right leading-tight text-gray-800"><p>المملكة العربية السعودية</p><p>الرياض</p><p>جوال: 0544782301</p></div>
             <div class="text-left leading-tight text-gray-800" dir="ltr"><p>Saudi Arabia</p><p>Riyadh</p><p>Mobile: 0544782301</p></div>
         </div>
@@ -302,8 +300,7 @@
                     </div>
                     ${contentHtml}
                     
-                    <!-- تم رفع التوقيعات للأعلى (bottom: 95px) -->
-                    <div style="position: absolute; bottom: 95px; left: 40px; right: 40px; display: flex; justify-content: space-between; align-items: flex-end; box-sizing: border-box;">
+                    <div style="position: absolute; bottom: 75px; left: 40px; right: 40px; display: flex; justify-content: space-between; align-items: flex-end; box-sizing: border-box;">
                         <div style="text-align: center; width: 200px;">
                             <div style="border-top: 2px solid #9ca3af; padding-top: 10px;">
                                 <div style="font-weight: bold; color: #1e3a8a; font-size: 20px;">توقيع المستلم</div>
@@ -319,8 +316,8 @@
                         </div>
                     </div>
 
-                    <!-- تم رفع الفوتر للأعلى (bottom: 15px) -->
-                    <div style="position: absolute; bottom: 15px; left: 0; right: 0; height: 50px; display: flex; justify-content: space-between; align-items: flex-end; font-size: 10px; font-weight: bold; border-top: 2px solid #9ca3af; padding-top: 10px; padding-bottom: 0px; padding-left: 40px; padding-right: 40px; box-sizing: border-box;">
+                    <!-- الفوتر هنا مرفوع الكلمة فيه لتحت مسافة عن الخط العلوي باستخدام flex-start و pt-15px -->
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 55px; display: flex; justify-content: space-between; align-items: flex-start; font-size: 10px; font-weight: bold; border-top: 2px solid #9ca3af; padding-top: 15px; padding-left: 40px; padding-right: 40px; box-sizing: border-box; background: white;">
                         <div style="text-align: right; line-height: 1.2; color: #1f2937;"><div>المملكة العربية السعودية</div><div>الرياض</div><div>جوال: 0544782301</div></div>
                         <div style="text-align: left; line-height: 1.2; color: #1f2937;" dir="ltr"><div>Saudi Arabia</div><div>Riyadh</div><div>Mobile: 0544782301</div></div>
                     </div>
@@ -340,7 +337,7 @@
                         </div>
                     </div>
                     ${contentHtml}
-                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 60px; padding: 0 20px; page-break-inside: avoid;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 50px; padding: 0 20px; page-break-inside: avoid;">
                         <div style="text-align: center; width: 220px;">
                             <div style="border-top: 2px solid #9ca3af; padding-top: 10px;">
                                 <div style="font-weight: bold; color: #1e3a8a; font-size: 20px;">توقيع المستلم</div>
@@ -354,6 +351,12 @@
                                 <div style="font-size: 12px; color: rgba(30,58,138,0.5); margin-top: 5px;">Official Stamp</div>
                             </div>
                         </div>
+                    </div>
+                    
+                    <!-- فوتر صفحات التقرير المتعددة -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 40px; font-size: 10px; font-weight: bold; border-top: 2px solid #9ca3af; padding-top: 15px; padding-left: 20px; padding-right: 20px; page-break-inside: avoid;">
+                        <div style="text-align: right; line-height: 1.2; color: #1f2937;"><div>المملكة العربية السعودية</div><div>الرياض</div><div>جوال: 0544782301</div></div>
+                        <div style="text-align: left; line-height: 1.2; color: #1f2937;" dir="ltr"><div>Saudi Arabia</div><div>Riyadh</div><div>Mobile: 0544782301</div></div>
                     </div>
                 </div>`;
             }
@@ -578,16 +581,17 @@
             document.getElementById('loadingOverlay').classList.add('hidden');
         }
 
-        // التحديث الأساسي اللي حل مشكلة نزول المحتوى لأسفل الشاشة
         function generatePdfBlob(htmlString, filename, isMultiPage) {
             return new Promise((resolve) => {
                 const element = document.createElement('div');
                 element.innerHTML = htmlString;
                 
-                // عزل العنصر عن الـ Flexbox الخاص بالصفحة الرئيسية تماماً
+                // الحل الصحيح للطباعة: نضع العنصر كطبقة مخفية خلف الصفحة الأساسية (لكن داخل مجال الرؤية)
                 element.style.position = 'absolute';
-                element.style.top = '-9999px';
-                element.style.left = '-9999px';
+                element.style.top = '0';
+                element.style.left = '0';
+                element.style.zIndex = '-1000'; 
+                element.style.width = '297mm'; 
                 element.style.backgroundColor = 'white';
                 
                 document.body.appendChild(element);
