@@ -26,10 +26,11 @@
             }
         }
 
+        /* تم إلغاء overflow:hidden لمنع أي قص، وتحويل النظام لـ Flexbox */
         .a4-landscape {
-            width: 297mm; height: 209mm; margin: 20px auto; background: white;
+            width: 297mm; min-height: 209mm; margin: 20px auto; background: white;
             box-shadow: 0 0 15px rgba(0,0,0,0.1); position: relative; box-sizing: border-box;
-            overflow: hidden; padding: 12mm 15mm 0 15mm;
+            padding: 12mm 15mm; display: flex; flex-direction: column; justify-content: space-between;
         }
 
         .excel-table-wrapper table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 1rem; }
@@ -67,7 +68,6 @@
             </div>
         </div>
 
-        <!-- أسعار وكميات اللوحات العادية -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <div><label class="block text-xs font-bold text-blue-900 mb-1">سعر الفردي (عادي)</label><input type="number" id="inputNormSingleRate" oninput="updatePreview()" class="w-full border p-2 rounded text-center font-bold" value="20"></div>
             <div><label class="block text-xs font-bold text-blue-900 mb-1">عدد الفردي (عادي)</label><input type="number" id="inputNormSingleCount" oninput="updatePreview()" class="w-full border p-2 rounded text-center font-bold" value="0"></div>
@@ -75,7 +75,6 @@
             <div><label class="block text-xs font-bold text-blue-900 mb-1">عدد المكرر (عادي)</label><input type="number" id="inputNormRepCount" oninput="updatePreview()" class="w-full border p-2 rounded text-center font-bold" value="0"></div>
         </div>
 
-        <!-- أسعار وكميات لوحات الإضاءة -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-amber-50 rounded-lg border border-amber-200">
             <div><label class="block text-xs font-bold text-amber-900 mb-1">سعر الفردي (إضاءة)</label><input type="number" id="inputLightSingleRate" oninput="updatePreview()" class="w-full border p-2 rounded text-center font-bold" value="25"></div>
             <div><label class="block text-xs font-bold text-amber-900 mb-1">عدد الفردي (إضاءة)</label><input type="number" id="inputLightSingleCount" oninput="updatePreview()" class="w-full border p-2 rounded text-center font-bold" value="0"></div>
@@ -117,28 +116,30 @@
         </div>
     </div>
 
-    <!-- منطقة المعاينة المباشرة (Live Preview) -->
-    <div id="printArea" class="a4-landscape bg-white">
+    <!-- منطقة المعاينة (تم تحويلها لـ Flexbox لتفادي القص تماماً) -->
+    <div id="printArea" class="a4-landscape bg-white flex flex-col justify-between">
+        
         <img src="logo1.png" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[35%] opacity-[0.05] pointer-events-none z-0" onerror="this.style.display='none'">
         
-        <div class="relative z-10 flex justify-between items-end border-b-2 border-gray-400 pb-2 mb-4">
-            <div class="w-1/3 text-right"><h1 class="text-2xl font-black text-gray-900">هوية بيتك</h1><p class="text-sm text-gray-700 font-bold mt-1">س.ت: 1010460174</p></div>
-            <div class="w-1/3 flex justify-center pb-1"><img src="logo1.png" alt="Logo" class="max-h-14 object-contain" onerror="this.style.display='none'"></div>
-            <div class="w-1/3 text-left" dir="ltr"><h1 class="text-xl font-black text-gray-900 tracking-tight">homeidentity</h1><p class="text-sm text-gray-700 font-bold mt-1">C.R: 1010460174</p></div>
-        </div>
+        <!-- الجزء العلوي (الجداول والبيانات) -->
+        <div class="relative z-10 w-full">
+            <div class="flex justify-between items-end border-b-2 border-gray-400 pb-2 mb-4">
+                <div class="w-1/3 text-right"><h1 class="text-2xl font-black text-gray-900">هوية بيتك</h1><p class="text-sm text-gray-700 font-bold mt-1">س.ت: 1010460174</p></div>
+                <div class="w-1/3 flex justify-center pb-1"><img src="logo1.png" alt="Logo" class="max-h-14 object-contain" onerror="this.style.display='none'"></div>
+                <div class="w-1/3 text-left" dir="ltr"><h1 class="text-xl font-black text-gray-900 tracking-tight">homeidentity</h1><p class="text-sm text-gray-700 font-bold mt-1">C.R: 1010460174</p></div>
+            </div>
 
-        <div class="relative z-10 flex justify-between items-center border-b-4 border-blue-900 pb-2 mb-4">
-            <div class="w-1/2"><h1 class="text-2xl font-black text-blue-900 mb-1">حساب مندوب</h1><p class="text-sm text-gray-500 font-bold uppercase tracking-widest">Delegate Account</p></div>
-            <div class="text-right bg-blue-50 p-2 rounded-lg border border-blue-100"><p class="text-xs font-bold text-blue-900/60">تاريخ الإصدار:</p><p id="dateDisplay" class="font-bold text-gray-800"></p></div>
-        </div>
+            <div class="flex justify-between items-center border-b-4 border-blue-900 pb-2 mb-4">
+                <div class="w-1/2"><h1 class="text-2xl font-black text-blue-900 mb-1">حساب مندوب</h1><p class="text-sm text-gray-500 font-bold uppercase tracking-widest">Delegate Account</p></div>
+                <div class="text-right bg-blue-50 p-2 rounded-lg border border-blue-100"><p class="text-xs font-bold text-blue-900/60">تاريخ الإصدار:</p><p id="dateDisplay" class="font-bold text-gray-800"></p></div>
+            </div>
 
-        <div class="relative z-10">
             <div class="flex justify-center items-center mb-4 px-4 py-3 bg-gray-100 rounded-lg border border-gray-300 gap-10">
                 <div class="text-lg font-bold"><span class="text-gray-600">اسم المندوب:</span> <span id="outDelName" class="text-blue-900 text-xl font-black mx-2">................</span></div>
                 <div class="text-lg font-bold"><span class="text-gray-600">عن شهر:</span> <span id="outDelMonth" class="text-blue-900 text-xl font-black mx-2">................</span></div>
             </div>
 
-            <table class="w-full border-collapse border-2 border-black text-center text-sm bg-white shadow-sm relative z-0">
+            <table class="w-full border-collapse border-2 border-black text-center text-sm bg-white shadow-sm">
                 <thead class="bg-gray-200">
                     <tr>
                         <th class="border border-black p-2 text-gray-800 w-[12%]">النوع</th>
@@ -169,23 +170,26 @@
             
             <p class="text-[11px] text-red-600 font-bold mt-2 text-left w-full">* ملاحظة: التقرير يشمل تحديث أسعار الإضاءة المعتمدة ابتداءً من 21 / 7 / 2026</p>
             
-            <div id="excelTableContainer" class="excel-table-wrapper h-[45mm] overflow-hidden mt-1"></div>
+            <div id="excelTableContainer" class="excel-table-wrapper h-[40mm] overflow-hidden mt-1"></div>
         </div>
 
-        <div class="absolute w-full left-0 right-0 px-16 z-20 flex justify-between items-end" style="bottom: 90px; box-sizing: border-box;">
-            <div class="text-center w-48">
-                <div class="border-t-2 border-gray-400 pt-2 relative z-10"><p class="font-bold text-blue-900 text-lg">توقيع المستلم</p><p class="text-[10px] text-gray-500 mt-1">Recipient Signature</p></div>
+        <!-- الجزء السفلي (التوقيعات والفوتر) ينزل تلقائياً لأسفل الصفحة بدون قص -->
+        <div class="relative z-10 w-full mt-6">
+            <div class="flex justify-between items-end px-12 mb-6">
+                <div class="text-center w-48">
+                    <div class="border-t-2 border-gray-400 pt-2"><p class="font-bold text-blue-900 text-lg">توقيع المستلم</p><p class="text-[10px] text-gray-500 mt-1">Recipient Signature</p></div>
+                </div>
+                <div class="text-center w-48 relative">
+                    <img src="logo2.png" class="mx-auto h-24 w-24 object-contain mix-blend-multiply opacity-90 absolute bottom-12 left-1/2 transform -translate-x-1/2 z-0" onerror="this.style.display='none'">
+                    <div class="border-t-2 border-blue-900/40 pt-2 relative z-10"><p class="font-bold text-blue-900 text-lg">الختم الرسمي</p><p class="text-[10px] text-blue-900/50 mt-1">Official Stamp</p></div>
+                </div>
             </div>
-            <div class="text-center w-48 relative">
-                <img src="logo2.png" class="mx-auto h-24 w-24 object-contain mix-blend-multiply opacity-90 absolute bottom-12 left-1/2 transform -translate-x-1/2 z-0" onerror="this.style.display='none'">
-                <div class="border-t-2 border-blue-900/40 pt-2 relative z-10"><p class="font-bold text-blue-900 text-lg">الختم الرسمي</p><p class="text-[10px] text-blue-900/50 mt-1">Official Stamp</p></div>
-            </div>
-        </div>
 
-        <!-- الفوتر: مرفوع عن نهاية الصفحة، ومسافة pt-5 لرفع الخط عن الكلام -->
-        <div class="absolute left-0 right-0 w-full flex justify-between items-start text-[11px] font-bold border-t-2 border-gray-400 pt-5 bg-white px-10 z-10" style="bottom: 20px;">
-            <div class="text-right leading-tight text-gray-800"><p>المملكة العربية السعودية</p><p>الرياض</p><p>جوال: 0544782301</p></div>
-            <div class="text-left leading-tight text-gray-800" dir="ltr"><p>Saudi Arabia</p><p>Riyadh</p><p>Mobile: 0544782301</p></div>
+            <!-- الفوتر معتمد على padding علوي لإبعاد الكلام عن الخط -->
+            <div class="flex justify-between items-start text-[11px] font-bold border-t-2 border-gray-400 pt-3 px-4">
+                <div class="text-right leading-tight text-gray-800"><p>المملكة العربية السعودية</p><p>الرياض</p><p>جوال: 0544782301</p></div>
+                <div class="text-left leading-tight text-gray-800" dir="ltr"><p>Saudi Arabia</p><p>Riyadh</p><p>Mobile: 0544782301</p></div>
+            </div>
         </div>
     </div>
 
@@ -284,41 +288,49 @@
             const today = new Date().toLocaleDateString('ar-SA');
             
             if (!isMultiPage) {
+                // الكود الجذري الجديد للورقة الواحدة (Batch) يعتمد على Flexbox بدلاً من التثبيت المطلق
                 return `
-                <div style="font-family: 'Noto Sans Arabic', Arial, sans-serif; direction: rtl; width: 297mm; height: 210mm; padding: 12mm 15mm 0 15mm; box-sizing: border-box; background-color: #ffffff; position: relative; overflow: hidden; margin: 0; border: none;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #9ca3af; padding-bottom: 10px; margin-bottom: 20px;">
-                        <div style="text-align: right;">
-                            <div style="font-size: 24px; font-weight: 900; color: #111827;">هوية بيتك</div>
-                            <div style="font-size: 14px; font-weight: bold; color: #374151;">س.ت: 1010460174</div>
-                        </div>
-                        <div style="text-align: center;"><img src="logo1.png" style="max-height: 55px;" onerror="this.style.display='none'"></div>
-                        <div style="text-align: left; direction: ltr;">
-                            <div style="font-size: 22px; font-weight: 900; color: #111827;">homeidentity</div>
-                            <div style="font-size: 14px; font-weight: bold; color: #374151;">C.R: 1010460174</div>
-                        </div>
-                    </div>
-                    ${contentHtml}
+                <div style="font-family: 'Noto Sans Arabic', Arial, sans-serif; direction: rtl; width: 297mm; min-height: 200mm; padding: 15mm 20mm; box-sizing: border-box; background-color: #ffffff; display: flex; flex-direction: column; justify-content: space-between; margin: 0;">
                     
-                    <div style="position: absolute; bottom: 90px; left: 40px; right: 40px; display: flex; justify-content: space-between; align-items: flex-end; box-sizing: border-box;">
-                        <div style="text-align: center; width: 200px;">
-                            <div style="border-top: 2px solid #9ca3af; padding-top: 10px;">
-                                <div style="font-weight: bold; color: #1e3a8a; font-size: 20px;">توقيع المستلم</div>
-                                <div style="font-size: 12px; color: #6b7280; margin-top: 5px;">Recipient Signature</div>
+                    <!-- الجزء العلوي: الهيدر والجدول -->
+                    <div style="width: 100%;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #9ca3af; padding-bottom: 10px; margin-bottom: 20px;">
+                            <div style="text-align: right;">
+                                <div style="font-size: 24px; font-weight: 900; color: #111827;">هوية بيتك</div>
+                                <div style="font-size: 14px; font-weight: bold; color: #374151;">س.ت: 1010460174</div>
+                            </div>
+                            <div style="text-align: center;"><img src="logo1.png" style="max-height: 55px;" onerror="this.style.display='none'"></div>
+                            <div style="text-align: left; direction: ltr;">
+                                <div style="font-size: 22px; font-weight: 900; color: #111827;">homeidentity</div>
+                                <div style="font-size: 14px; font-weight: bold; color: #374151;">C.R: 1010460174</div>
                             </div>
                         </div>
-                        <div style="text-align: center; width: 200px; position: relative;">
-                            <img src="logo2.png" style="height: 100px; object-fit: contain; mix-blend-mode: multiply; opacity: 0.9; margin-bottom: -15px;" onerror="this.style.display='none'">
-                            <div style="border-top: 2px solid rgba(30,58,138,0.4); padding-top: 10px; position: relative; z-index: 10;">
-                                <div style="font-weight: bold; color: #1e3a8a; font-size: 20px;">الختم الرسمي</div>
-                                <div style="font-size: 12px; color: rgba(30,58,138,0.5); margin-top: 5px;">Official Stamp</div>
-                            </div>
-                        </div>
+                        ${contentHtml}
                     </div>
+                    
+                    <!-- الجزء السفلي: التوقيعات والفوتر (ينزل تلقائياً للأسفل بدون قص) -->
+                    <div style="width: 100%; margin-top: 30px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; padding: 0 40px; margin-bottom: 20px;">
+                            <div style="text-align: center; width: 200px;">
+                                <div style="border-top: 2px solid #9ca3af; padding-top: 10px;">
+                                    <div style="font-weight: bold; color: #1e3a8a; font-size: 20px;">توقيع المستلم</div>
+                                    <div style="font-size: 12px; color: #6b7280; margin-top: 5px;">Recipient Signature</div>
+                                </div>
+                            </div>
+                            <div style="text-align: center; width: 200px; position: relative;">
+                                <img src="logo2.png" style="height: 100px; object-fit: contain; mix-blend-mode: multiply; opacity: 0.9; margin-bottom: -15px;" onerror="this.style.display='none'">
+                                <div style="border-top: 2px solid rgba(30,58,138,0.4); padding-top: 10px; position: relative; z-index: 10;">
+                                    <div style="font-weight: bold; color: #1e3a8a; font-size: 20px;">الختم الرسمي</div>
+                                    <div style="font-size: 12px; color: rgba(30,58,138,0.5); margin-top: 5px;">Official Stamp</div>
+                                </div>
+                            </div>
+                        </div>
 
-                    <!-- الفوتر: مسافة 20px لدفع النص للأسفل بعيد عن الخط العلوي -->
-                    <div style="position: absolute; bottom: 20px; left: 0; right: 0; display: flex; justify-content: space-between; align-items: flex-start; font-size: 11px; font-weight: bold; border-top: 2px solid #9ca3af; padding-top: 20px; padding-left: 40px; padding-right: 40px; box-sizing: border-box;">
-                        <div style="text-align: right; line-height: 1.5; color: #1f2937;"><div>المملكة العربية السعودية</div><div>الرياض</div><div>جوال: 0544782301</div></div>
-                        <div style="text-align: left; line-height: 1.5; color: #1f2937;" dir="ltr"><div>Saudi Arabia</div><div>Riyadh</div><div>Mobile: 0544782301</div></div>
+                        <!-- الفوتر بمسافة بادئة عليا (padding-top) لإبعاد الكلام عن الخط -->
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; font-size: 11px; font-weight: bold; border-top: 2px solid #9ca3af; padding-top: 15px; padding-left: 10px; padding-right: 10px; box-sizing: border-box;">
+                            <div style="text-align: right; line-height: 1.5; color: #1f2937;"><div>المملكة العربية السعودية</div><div>الرياض</div><div>جوال: 0544782301</div></div>
+                            <div style="text-align: left; line-height: 1.5; color: #1f2937;" dir="ltr"><div>Saudi Arabia</div><div>Riyadh</div><div>Mobile: 0544782301</div></div>
+                        </div>
                     </div>
                 </div>`;
             } else {
@@ -373,7 +385,7 @@
                     const d = batchData[i];
                     const name = d['Delegate Name'] || d['اسم المندوب'] || d['الاسم'] || `مندوب_${i}`;
                     
-                    // تجاهل صف الإجمالي الكلي عشان ميطلّعش PDF فاضي أو غريب
+                    // منع استخراج صف الإجمالي الكلي لـ PDF
                     if (name === 'الإجمالي الكلي' || name === 'Grand Total') {
                         continue;
                     }
@@ -584,19 +596,18 @@
             document.getElementById('loadingOverlay').classList.add('hidden');
         }
 
-        // الحل الجذري: إرسال النص (String) مباشرة دون أي محاولات إخفاء أو تعديل في الشاشة الأساسية
+        // إرسال كود الـ HTML مباشرة لطباعته (أضمن وأقوى طريقة لمنع المشاكل)
         function generatePdfBlob(htmlString, filename, isMultiPage) {
             return new Promise((resolve) => {
                 const opt = {
                     margin:       isMultiPage ? [10, 10, 20, 10] : [0, 0, 0, 0], 
                     filename:     filename,
                     image:        { type: 'jpeg', quality: 1 },
-                    html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' }, // يضمن خلفية بيضاء صافية 100%
+                    html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' }, 
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
                     pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
                 };
 
-                // إرسال النص (htmlString) بدلاً من العنصر يمنع تماماً الشاشات البيضاء أو قطع الهوامش
                 html2pdf().set(opt).from(htmlString).output('blob').then(function(blob) {
                     resolve(blob);
                 });
